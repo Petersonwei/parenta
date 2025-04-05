@@ -1,0 +1,28 @@
+{
+  "projects": [
+    {
+      "title": "E-Commerce Store Development Project",
+      "description": "A full-stack e-commerce platform using .NET Core, React with Redux (RTK Query) and ASP.NET Core Identity, enabling secure transactions and handling concurrent users with Stripe API payment integration.",
+      "technologies": [".NET Core", "React", "Redux", "RTK Query", "ASP.NET Core Identity", "Entity Framework", "MS SQL Server", "Stripe API", "Azure DevOps", "Material UI", "TypeScript"],
+      "link": null
+    },
+    {
+      "title": "AWS To-Do List Application",
+      "description": "A full-stack to-do app with a Django REST API backend and a React (Vite) frontend, deployed on AWS (EC2, RDS, S3, CloudFront, Route 53), supporting hundreds of daily tasks.",
+      "technologies": ["Django", "React", "Vite", "AWS EC2", "AWS RDS", "AWS S3", "AWS CloudFront", "AWS Route 53", "Nginx", "Gunicorn", "Certbot"],
+      "link": null
+    },
+    {
+      "title": "Peter Wei Portfolio",
+      "description": "A modern portfolio website built with Next.js, React, and ShadCN UI, featuring a chat interface and CV content.",
+      "technologies": ["Next.js", "React", "TypeScript", "Tailwind CSS", "ShadCN UI", "Vercel"],
+      "link": "https://my-portfolio-ruddy-alpha-30.vercel.app/"
+    },
+    {
+      "title": "DriBag Coffee Website",
+      "description": "Launched DriBag, securing $5K+ in sales, acquiring a corporate client, and gaining 37K+ social media impressions.",
+      "technologies": ["Shopify", "SEO", "Social Media Marketing"],
+      "link": "https://dribagcoffee.com.au/"
+    }
+  ]
+} 

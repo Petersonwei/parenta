@@ -1,0 +1,50 @@
+{
+  "programming": {
+    "title": "Programming Languages",
+    "items": [
+      "JavaScript (ES6+)", "TypeScript", "Python", "C#", "C++", "SQL", "PHP", "HTML5", "CSS3", "Java"
+    ]
+  },
+  "frameworks": {
+    "title": "Frameworks & Libraries", 
+    "items": [
+      "React", "Next.js", "React Native", "Node.js (Express.js, Nest.js)", ".NET Core", "Django"
+    ]
+  },
+  "databases": {
+    "title": "Databases & Data Stores",
+    "items": [
+      "MongoDB", "PostgreSQL", "MySQL", "MS SQL Server", "Firebase"
+    ]
+  },
+  "cloudAndDevOps": {
+    "title": "Cloud & DevOps",
+    "items": [
+      "AWS (EC2, S3, RDS, Lambda)", "Azure", "Docker", "Kubernetes", "GitHub Actions", "CI/CD Pipelines"
+    ]
+  },
+  "testing": {
+    "title": "Testing & Automation",
+    "items": [
+      "Jest", "Cypress", "Selenium"
+    ]
+  },
+  "dataEngineering": {
+    "title": "Data Engineering",
+    "items": [
+      "Data Warehousing", "Data Visualisation (Power BI, Tableau)", "Business Intelligence"
+    ]
+  },
+  "design": {
+    "title": "Design",
+    "items": [
+      "UI/UX Design", "Figma", "Wireframing", "Prototyping"
+    ]
+  },
+  "projectManagement": {
+    "title": "Project Management",
+    "items": [
+      "Agile (Scrum, Kanban)", "Leadership", "Multi-Level Stakeholder Management"
+    ]
+  }
+} 

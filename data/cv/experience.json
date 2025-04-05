@@ -1,0 +1,43 @@
+{
+  "experiences": [
+    {
+      "title": "Software Developer Intern",
+      "company": "Vexit IT Consulting",
+      "date": "Dec 2024 - Present",
+      "description": [
+        "Built a dynamic article management system using Next.js, React, ShadCN UI, Redux, and RTK Query that enables seamless content updates with an intuitive admin interface.",
+        "Integrated .NET Core and PostgreSQL, optimising RESTful APIs and queries to improve system performance by 40%.",
+        "Streamlined deployments by 30% by implementing Azure DevOps CI/CD pipelines and Agile workflows, making releases faster and more scalable."
+      ]
+    },
+    {
+      "title": "Software Developer Intern",
+      "company": "Easy Skill Australia Pty Ltd",
+      "date": "Aug 2024 - Dec 2024",
+      "description": [
+        "Built and optimised full-stack solutions by integrating NestJS, Node.js, MongoDB, React, Vite, Axios, and Redux, supporting 1,500+ projects, improving UI responsiveness by 40%, and achieving 75% faster deployments via CI/CD.",
+        "Prototyped AWS Amplify & Elastic Beanstalk hosting solutions, analysing multiple cloud platforms and reducing costs by 30%.",
+        "Mentored a new intern for 5 weeks, accelerating onboarding by 40% and reducing code review time by 25% through structured guidance and documentation.",
+        "Facilitated cross-team collaboration with 2+ teams and 5+ stakeholders, ensuring smooth alignment between business requirements and technical execution."
+      ]
+    },
+    {
+      "title": "Web Developer Intern",
+      "company": "AxCharge Ltd. Pty",
+      "date": "Mar 2024 - Aug 2024",
+      "description": [
+        "Resolved a major outage by debugging with Chrome DevTools and optimising server configurations, collaborating with 4 service providers to minimise downtime and ensure a smooth resolution.",
+        "Developed and optimised responsive websites using WordPress, Elementor, HTML, CSS, and JavaScript, enhancing UX/UI design, increasing page views by 55%, and reducing load times by 40% through modern web framework integration and performance analysis."
+      ]
+    },
+    {
+      "title": "Webmaster (Casual)",
+      "company": "Rotary Club of Brisbane",
+      "date": "Mar 2024 - Present",
+      "description": [
+        "Revamped website architecture and enhanced site navigation by integrating HTML, CSS, and Club Runner, modernising UI and improving user experience, resulting in a 40% increase in monthly active users and a 9.5/10 customer satisfaction score.",
+        "Collaborated with multiple teams and stakeholders to develop the official Rotary Queensland 9620 District Conference website, enhancing digital presence and accessibility."
+      ]
+    }
+  ]
+} 
