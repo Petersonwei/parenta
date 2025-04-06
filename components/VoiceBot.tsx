@@ -580,7 +580,7 @@ const VoiceBot = forwardRef<VoiceBotRef, VoiceBotProps>(({ onCallStatusChange, o
             ) : (
               <>
                 <Phone className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Start Call
+                Start Chat
               </>
             )}
           </Button>
@@ -610,7 +610,7 @@ const VoiceBot = forwardRef<VoiceBotRef, VoiceBotProps>(({ onCallStatusChange, o
         )}
 
         {/* Chat message display */}
-        <ScrollArea className="h-[400px] sm:h-[500px] rounded-md border p-3 sm:p-4 bg-muted/20">
+        <ScrollArea className="min-h-[200px] max-h-[600px] h-auto rounded-md border p-3 sm:p-4 bg-muted/20">
           <div className="space-y-3 sm:space-y-4">
             {state.messages.length === 0 && (
               <div className="h-full flex items-center justify-center py-16 sm:py-20">

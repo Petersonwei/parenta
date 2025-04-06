@@ -102,7 +102,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
 
           <ScrollArea 
             ref={scrollAreaRef}
-            className="flex-grow rounded-xl bg-muted/50 backdrop-blur-sm p-2 sm:p-4 min-h-[30vh] landscape:min-h-[20vh] landscape:h-auto landscape:p-2 overflow-y-auto landscape-scrollarea"
+            className="flex-grow rounded-xl bg-muted/50 backdrop-blur-sm p-2 sm:p-4 min-h-[10vh] landscape:min-h-[10vh] landscape:h-auto landscape:p-2 overflow-y-auto landscape-scrollarea"
           >
             <div className="space-y-2 sm:space-y-4 landscape:space-y-1.5">
               {messages.map((message) => (
