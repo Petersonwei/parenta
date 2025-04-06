@@ -42,7 +42,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
       
       // Show toast when call starts
       toast({
-        title: "Peter is joining the call",
+        title: "Anna is joining the chat",
         description: "Please wait while the connection is established",
       })
 
@@ -79,7 +79,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
               </div>
               <div>
                 <h2 className="text-sm sm:text-xl font-semibold landscape:text-xs landscape:sm:text-sm landscape-text">
-                  {isPeterSpeaking ? "Peter is speaking..." : "Peter Wei"}
+                  {isPeterSpeaking ? "Anna is speaking..." : "Anna"}
                 </h2>
                 {isPeterSpeaking && (
                   <p className="text-muted-foreground text-xs landscape:text-[10px] landscape-text">
@@ -119,7 +119,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                   }`}>
                     <CardContent className="p-2 sm:p-3 landscape:p-1.5">
                       <p className="text-xs font-medium mb-1 opacity-70 landscape:text-[10px] landscape:mb-0.5 landscape-text">
-                        {message.role === 'user' ? 'You' : 'Peter'}
+                        {message.role === 'user' ? 'You' : 'Anna'}
                       </p>
                       <p className="text-xs sm:text-base leading-relaxed landscape:leading-snug landscape:text-xs landscape-text">{message.content}</p>
                     </CardContent>

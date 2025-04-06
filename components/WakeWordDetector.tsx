@@ -80,7 +80,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const isListeningRef = useRef<boolean>(false);
     const isCallEndingRef = useRef<boolean>(false);
     const startCallRef = useRef<() => Promise<void>>(() => Promise.resolve());
-    const startWakeWordDetectionRef = useRef<(() => void) | null>(null);
     
     // Clear all timeouts to prevent memory leaks
     const clearAllTimeouts = useCallback(() => {
@@ -166,10 +165,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         restartTimeoutRef.current = setTimeout(() => {
           if (!isListeningRef.current) {
             console.log('[WakeWordDetector] Starting wake word detection from state change');
-            // Use the current function from ref instead of direct call
-            if (startWakeWordDetectionRef.current) {
-              startWakeWordDetectionRef.current();
-            }
+            startWakeWordDetection();
           } else {
             console.log('[WakeWordDetector] Already listening, not restarting');
           }
@@ -467,11 +463,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         }
       }
     }, [detectorState, stopRecognition, clearAllTimeouts, toast]);
-    
-    // Keep the startWakeWordDetectionRef current
-    useEffect(() => {
-      startWakeWordDetectionRef.current = startWakeWordDetection;
-    }, [startWakeWordDetection]);
     
     // Function to handle call end
     const handleCallEnd = () => {

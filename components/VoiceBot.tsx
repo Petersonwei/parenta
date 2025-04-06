@@ -363,12 +363,12 @@ const VoiceBot = forwardRef<VoiceBotRef, VoiceBotProps>(({ onCallStatusChange, o
 
         if (!content) return
 
-        // Check for "Byebye Peter" to end the call
-        if (role === 'user' && content.toLowerCase().includes('byebye peter')) {
+        // Check for "Byebye Anna" to end the call
+        if (role === 'user' && content.toLowerCase().includes('byebye Anna')) {
           console.log('[VoiceBot] End call phrase detected:', content);
           toast({
             title: "End Call Detected",
-            description: "Byebye Peter detected! Ending call...",
+            description: "Byebye Anna detected! Ending call...",
           });
           
           // End the call with a slight delay to allow the message to be added
@@ -619,7 +619,7 @@ const VoiceBot = forwardRef<VoiceBotRef, VoiceBotProps>(({ onCallStatusChange, o
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
                   <h3 className="text-base sm:text-lg font-medium mb-1">No conversations yet</h3>
-                  <p className="text-xs sm:text-sm">Say <strong>Hey Peter</strong> or click the Start Call button to begin</p>
+                  <p className="text-xs sm:text-sm">Say <strong>Hi Anna</strong> or click the Start Call button to begin</p>
                 </div>
               </div>
             )}
@@ -637,7 +637,7 @@ const VoiceBot = forwardRef<VoiceBotRef, VoiceBotProps>(({ onCallStatusChange, o
                 }`}>
                   <CardContent className="p-2 sm:p-3">
                     <p className="text-xs font-medium mb-1 opacity-70">
-                      {message.role === 'user' ? 'You' : 'Peter'}
+                      {message.role === 'user' ? 'You' : 'Anna'}
                     </p>
                     <p className="text-sm sm:text-base leading-relaxed">{message.content}</p>
                   </CardContent>
