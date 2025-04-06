@@ -33,16 +33,14 @@ export default function ChatPage() {
       
       <div className="flex-1 p-3 sm:p-6 max-w-3xl mx-auto w-full">
         
-        
+        <ChatHeader />
+        <InstructionsCard />
         <WakeWordDetector 
           ref={wakeWordDetectorRef}
           onCallStatusChange={handleCallStatusChange}
           onMessagesUpdate={handleMessagesUpdate}
           onEndCall={() => setIsCallActive(false)}
         />
-
-        <ChatHeader />
-        <InstructionsCard />
       </div>
 
       <TranscriptOverlay 

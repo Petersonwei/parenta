@@ -17,14 +17,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Parenta",
-  description: "AI-powered voice assistant for parents",
+  title: "Triple P - Positive Parenting Program",
+  description: "Proven, positive tips that can help every family",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/Tripel P Logo.png', type: 'image/png' },
+      { url: '/Triple P Logo.png', type: 'image/png' },
     ],
-    apple: '/Tripel P Logo.png',
+    apple: '/Triple P Logo.png',
   },
 };
 

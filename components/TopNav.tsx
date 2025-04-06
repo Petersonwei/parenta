@@ -50,15 +50,15 @@ export function TopNav() {
           <NavigationMenu>
             <NavigationMenuList className="gap-2">
               <NavigationMenuItem>
-                <Link href="/portfolio" legacyBehavior passHref>
+                <Link href="/about" legacyBehavior passHref>
                   <NavigationMenuLink
                     className={cn(
                       "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
-                      pathname === "/portfolio" && "bg-accent text-accent-foreground shadow-sm"
+                      pathname === "/about" && "bg-accent text-accent-foreground shadow-sm"
                     )}
                   >
                     <Briefcase className="mr-2 h-4 w-4" />
-                    Portfolio
+                    About Triple P
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -102,16 +102,16 @@ export function TopNav() {
                 </SheetHeader>
                 <div className="mt-6">
                   <nav className="space-y-2">
-                    <Link href="/portfolio" legacyBehavior passHref>
+                    <Link href="/about" legacyBehavior passHref>
                       <Button
-                        variant={pathname === "/portfolio" ? "secondary" : "ghost"}
+                        variant={pathname === "/about" ? "secondary" : "ghost"}
                         className={cn(
                           "w-full justify-start transition-all",
-                          pathname === "/portfolio" && "bg-secondary shadow-sm"
+                          pathname === "/about" && "bg-secondary shadow-sm"
                         )}
                       >
                         <Briefcase className="mr-2 h-4 w-4" />
-                        Portfolio
+                        About Triple P
                       </Button>
                     </Link>
                     <Link href="/chat" legacyBehavior passHref>

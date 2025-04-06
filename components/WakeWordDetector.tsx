@@ -80,6 +80,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const isListeningRef = useRef<boolean>(false);
     const isCallEndingRef = useRef<boolean>(false);
     const startCallRef = useRef<() => Promise<void>>(() => Promise.resolve());
+    const startWakeWordDetectionRef = useRef<(() => void) | null>(null);
     
     // Clear all timeouts to prevent memory leaks
     const clearAllTimeouts = useCallback(() => {
@@ -165,7 +166,10 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         restartTimeoutRef.current = setTimeout(() => {
           if (!isListeningRef.current) {
             console.log('[WakeWordDetector] Starting wake word detection from state change');
-            startWakeWordDetection();
+            // Use the current function from ref instead of direct call
+            if (startWakeWordDetectionRef.current) {
+              startWakeWordDetectionRef.current();
+            }
           } else {
             console.log('[WakeWordDetector] Already listening, not restarting');
           }
@@ -389,22 +393,23 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         // More lenient wake word detection - check for partial matches
         const detectWakeWord = (text: string) => {
           // Check for exact matches first
-          if (text.includes('hey peter') || text.includes('hi peter')) {
+          // Check for exact matches first
+          if (text.includes('hey anna') || text.includes('hi anna')) {
             return true;
           }
           
           // Check for close variations (more permissive)
-          const peterVariations = ['peter', 'pete', 'peeta', 'peta', 'peder', 'pedr', 'pieter', 'peeter', 'petah', 'pita'];
+          const annaVariations = ['anna', 'ana', 'enna', 'enna', 'hannah', 'hanna', 'onna', 'ahna', 'anah', 'annuh'];
           const heyVariations = ['hey', 'hi', 'hay', 'hei', 'ay', 'hello', 'helo', 'heya', 'hiya', 'eh', 'ey'];
           
-          // Check for any combination of hey/hi + peter variations
+          // Check for any combination of hey/hi + anna variations
           for (const hey of heyVariations) {
-            for (const peter of peterVariations) {
-              const phrase = `${hey} ${peter}`;
+            for (const anna of annaVariations) {
+              const phrase = `${hey} ${anna}`;
               // Use a more lenient matching approach - if the text contains any parts of the wake phrase
               if (text.includes(phrase) || 
-                  (text.includes(hey) && text.includes(peter)) || 
-                  text.includes(peter)) {
+                  (text.includes(hey) && text.includes(anna)) || 
+                  text.includes(anna)) {
                 return true;
               }
             }
@@ -430,7 +435,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           // Show toast
           toast({
             title: "Wake Word Detected",
-            description: "Hey Peter detected! Starting call...",
+            description: "Hey Anna detected! Starting call...",
           });
           
           // Start call after a short delay to ensure clean state transition
@@ -462,6 +467,11 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         }
       }
     }, [detectorState, stopRecognition, clearAllTimeouts, toast]);
+    
+    // Keep the startWakeWordDetectionRef current
+    useEffect(() => {
+      startWakeWordDetectionRef.current = startWakeWordDetection;
+    }, [startWakeWordDetection]);
     
     // Function to handle call end
     const handleCallEnd = () => {
@@ -567,7 +577,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const getStatusText = (state: DetectorState): string => {
       switch (state) {
         case 'initializing': return 'Initializing...';
-        case 'listening': return 'Listening for Hey Peter';
+        case 'listening': return 'Listening for Hi Anna';
         case 'detected': return 'Wake word detected!';
         case 'calling': return 'In call';
         case 'error': return 'Error';
