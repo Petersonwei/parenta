@@ -96,7 +96,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const isListeningRef = useRef<boolean>(false);  // Flag to track if recognition is active
     const isCallEndingRef = useRef<boolean>(false);  // Flag to prevent multiple call end attempts
     const startCallRef = useRef<() => Promise<void>>(() => Promise.resolve());  // Reference to startCall function
-    const hasMicrophonePermissionRef = useRef<boolean>(false);  // Track if microphone permission has been granted
     
     /**
      * Clears all timeouts to prevent memory leaks and unexpected behavior
@@ -135,41 +134,169 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     }, []);
     
     /**
-     * Request microphone permission and handle the result
+     * Initialize the detector on mount:
+     * - Check browser support for speech recognition
+     * - Request microphone permissions
+     * - Set up initial state
      */
-    const requestMicrophonePermission = useCallback(() => {
-      console.log('[WakeWordDetector] Requesting microphone permission');
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
       
-      // Prevent multiple requests
-      if (isTransitioningRef.current) {
-        console.log('[WakeWordDetector] Already requesting permission, ignoring duplicate request');
+      // Check browser support
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        toast({
+          title: "Browser not supported",
+          description: "Your browser doesn't support speech recognition. Please try Chrome or Edge.",
+          variant: "destructive"
+        });
+        setDetectorState('error');
         return;
       }
       
-      isTransitioningRef.current = true;
-      
+      // Request microphone permission
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(() => {
           console.log('[WakeWordDetector] Microphone permission granted');
-          hasMicrophonePermissionRef.current = true;
+          // Start in listening mode once permission is granted
           setDetectorState('listening');
-          isTransitioningRef.current = false;
         })
         .catch((err) => {
           console.error('[WakeWordDetector] Microphone permission denied:', err);
-          
-          // Show toast
           toast({
             title: "Microphone Access Denied",
             description: "Please allow microphone access to use the wake word feature.",
             variant: "destructive"
           });
-          
-          // Set error state
           setDetectorState('error');
-          isTransitioningRef.current = false;
         });
+        
+      // Add event listener for manual start
+      const handleStartConversation = () => {
+        console.log('[WakeWordDetector] Received startConversation event');
+        if (detectorState === 'listening') {
+          stopRecognition();
+          clearAllTimeouts();
+          isTransitioningRef.current = true;
+          setDetectorState('detected');
+          
+          // Start call after a short delay
+          setTimeout(() => {
+            startCallRef.current();
+            setTimeout(() => {
+              isTransitioningRef.current = false;
+            }, 1000);
+          }, 500);
+        }
+      };
+      
+      window.addEventListener('startConversation', handleStartConversation);
+        
+      // Cleanup on unmount
+      return () => {
+        stopRecognition();
+        clearAllTimeouts();
+        window.removeEventListener('startConversation', handleStartConversation);
+      };
+    }, [toast, stopRecognition, clearAllTimeouts, detectorState]);
+    
+    /**
+     * Manages speech recognition based on detector state
+     * - Starts recognition when in 'listening' state
+     * - Stops recognition in other states
+     */
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      
+      console.log('[WakeWordDetector] State changed to:', detectorState);
+      
+      // Only start recognition when in listening state
+      if (detectorState === 'listening' && !isTransitioningRef.current) {
+        // Add a small delay before starting to avoid rapid restarts
+        restartTimeoutRef.current = setTimeout(() => {
+          if (!isListeningRef.current) {
+            console.log('[WakeWordDetector] Starting wake word detection from state change');
+            startWakeWordDetection();
+          } else {
+            console.log('[WakeWordDetector] Already listening, not restarting');
+          }
+        }, 1000);
+      } else {
+        // For any other state, stop recognition and clear timeouts
+        stopRecognition();
+        
+        // Don't clear callEndedTimeoutRef here, as we need it to persist
+        // through state transitions to prevent premature restart
+        if (noSpeechTimeoutRef.current) {
+          clearTimeout(noSpeechTimeoutRef.current);
+          noSpeechTimeoutRef.current = null;
+        }
+        
+        if (restartTimeoutRef.current) {
+          clearTimeout(restartTimeoutRef.current);
+          restartTimeoutRef.current = null;
+        }
+      }
+      
+      return () => {
+        // Only stop recognition and clear restart timeout on cleanup
+        // Don't clear callEndedTimeout here
+        if (detectorState !== 'listening') {
+          stopRecognition();
+        }
+        
+        if (restartTimeoutRef.current) {
+          clearTimeout(restartTimeoutRef.current);
+          restartTimeoutRef.current = null;
+        }
+        
+        if (noSpeechTimeoutRef.current) {
+          clearTimeout(noSpeechTimeoutRef.current);
+          noSpeechTimeoutRef.current = null;
+        }
+      };
+    }, [detectorState, clearAllTimeouts, stopRecognition]);
+    
+    /**
+     * Initiates a call using the VoiceBot component
+     * Called when wake word is detected
+     */
+    const startCall = useCallback(async () => {
+      // Don't start if we're ending a call
+      if (isCallEndingRef.current) {
+        console.log('[WakeWordDetector] Cannot start call while ending another call');
+        return;
+      }
+
+      setDetectorState('calling');
+      
+      if (voiceBotRef.current) {
+        try {
+          await voiceBotRef.current.startCall();
+        } catch (err) {
+          console.error('[WakeWordDetector] Error starting call:', err);
+          toast({
+            title: "Call Error",
+            description: "Failed to start call. Please try again.",
+            variant: "destructive"
+          });
+          
+          // Go back to listening mode after a delay
+          isTransitioningRef.current = true;
+          setTimeout(() => {
+            setDetectorState('listening');
+            setTimeout(() => {
+              isTransitioningRef.current = false;
+            }, 1000);
+          }, 2000);
+        }
+      }
     }, [toast]);
+
+    // Keep startCallRef current to avoid stale closures
+    useEffect(() => {
+      startCallRef.current = startCall;
+    }, [startCall]);
     
     /**
      * Starts the wake word detection process
@@ -186,18 +313,9 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         return;
       }
       
-      // Don't start if we're not in listening state or if we're in a call
+      // Don't start if we're in a call
       if (detectorState !== 'listening') {
-        console.log('[WakeWordDetector] Not in proper state for wake word detection:', detectorState);
-        return;
-      }
-      
-      // Make sure we have microphone permission before starting
-      if (!hasMicrophonePermissionRef.current) {
-        console.log('[WakeWordDetector] No microphone permission, requesting it first');
-        setDetectorState('initializing');
-        // Request permission again
-        requestMicrophonePermission();
+        console.log('[WakeWordDetector] Not in listening state, not starting');
         return;
       }
       
@@ -263,21 +381,12 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           isListeningRef.current = false;
         } else if (event.error === 'not-allowed') {
           console.error('[WakeWordDetector] Microphone access denied:', event.error);
-          
-          // Mark permission as not granted
-          hasMicrophonePermissionRef.current = false;
-          
-          // If we're in a call, don't show error state to avoid interrupting the call
-          if (detectorState !== 'calling' as DetectorState) {
-            setDetectorState('error');
-            toast({
-              title: "Microphone Access Error",
-              description: "Please allow microphone access in your browser settings.",
-              variant: "destructive"
-            });
-          } else {
-            console.log('[WakeWordDetector] Ignoring microphone error during active call');
-          }
+          setDetectorState('error');
+          toast({
+            title: "Microphone Access Error",
+            description: "Please allow microphone access in your browser settings.",
+            variant: "destructive"
+          });
         } else {
           // For other errors, log and restart if needed
           console.error('[WakeWordDetector] Recognition error:', event.error);
@@ -327,19 +436,16 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           noSpeechTimeoutRef.current = null;
         }
         
-        // Don't process results if we're transitioning states or in a call
-        if (isTransitioningRef.current || detectorState !== 'listening') {
-          console.log('[WakeWordDetector] Ignoring speech recognition results - currently transitioning or not in listening state:', detectorState);
-          return;
-        }
-
+        // Don't process results if we're transitioning states
+        if (isTransitioningRef.current) return;
+        
         const transcript = Array.from(event.results)
           .map((result: SpeechRecognitionResult) => result[0].transcript.toLowerCase())
           .join(' ');
         
         // Only log if there's meaningful content to reduce console spam
         if (transcript.trim().length > 0) {
-          console.log('[WakeWordDetector] Heard:', transcript, 'Current state:', detectorState);
+          console.log('[WakeWordDetector] Heard:', transcript);
         }
         
         // More lenient wake word detection - check for partial matches
@@ -420,256 +526,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     }, [detectorState, stopRecognition, clearAllTimeouts, toast]);
     
     /**
-     * Initialize the detector on mount:
-     * - Check browser support for speech recognition
-     * - Request microphone permissions
-     * - Set up initial state
-     */
-    useEffect(() => {
-      if (typeof window === 'undefined') return;
-      
-      // Reset all state flags on mount to ensure clean state
-      console.log('[WakeWordDetector] Initializing component, resetting flags');
-      isTransitioningRef.current = false;
-      isListeningRef.current = false;
-      isCallEndingRef.current = false;
-      
-      // Check browser support
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        toast({
-          title: "Browser not supported",
-          description: "Your browser doesn't support speech recognition. Please try Chrome or Edge.",
-          variant: "destructive"
-        });
-        setDetectorState('error');
-        return;
-      }
-      
-      // Request microphone permission using our shared function
-      requestMicrophonePermission();
-        
-      // Add event listener for manual start
-      const handleStartConversation = () => {
-        console.log('[WakeWordDetector] Received startConversation event');
-        // Only respond to the event if we have microphone permission
-        if (detectorState === 'listening' && hasMicrophonePermissionRef.current) {
-          stopRecognition();
-          clearAllTimeouts();
-          isTransitioningRef.current = true;
-          setDetectorState('detected');
-          
-          // Start call after a short delay
-          setTimeout(() => {
-            startCallRef.current();
-            setTimeout(() => {
-              isTransitioningRef.current = false;
-            }, 1000);
-          }, 500);
-        }
-      };
-      
-      // Add event listener for page unload to clean up resources
-      const handleBeforeUnload = () => {
-        console.log('[WakeWordDetector] Page unloading, cleaning up resources');
-        stopRecognition();
-        clearAllTimeouts();
-      };
-      
-      window.addEventListener('startConversation', handleStartConversation);
-      window.addEventListener('beforeunload', handleBeforeUnload);
-        
-      // Cleanup on unmount
-      return () => {
-        console.log('[WakeWordDetector] Component unmounting, cleaning up resources');
-        stopRecognition();
-        clearAllTimeouts();
-        window.removeEventListener('startConversation', handleStartConversation);
-        window.removeEventListener('beforeunload', handleBeforeUnload);
-      };
-    }, [toast, stopRecognition, clearAllTimeouts, detectorState, startWakeWordDetection]);
-    
-    /**
-     * Manages speech recognition based on detector state
-     * - Starts recognition when in 'listening' state
-     * - Stops recognition in other states
-     */
-    useEffect(() => {
-      if (typeof window === 'undefined') return;
-      
-      console.log('[WakeWordDetector] State changed to:', detectorState);
-      
-      // Important: Always stop recognition first when state changes
-      // to prevent multiple overlapping instances
-      stopRecognition();
-      
-      // Only start recognition when in listening state AND not transitioning
-      if (detectorState === 'listening' && !isTransitioningRef.current) {
-        console.log('[WakeWordDetector] Will start wake word detection after state change');
-        
-        // Add a delay before starting to avoid rapid restarts and ensure clean state
-        restartTimeoutRef.current = setTimeout(() => {
-          // Double-check state is still listening before starting
-          if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
-            console.log('[WakeWordDetector] Starting wake word detection from state change');
-            startWakeWordDetection();
-          } else {
-            console.log('[WakeWordDetector] State changed during timeout, not starting recognition');
-          }
-        }, 2000); // Increased delay for stability
-      } else {
-        // For any other state, stop recognition and clear timeouts
-        console.log('[WakeWordDetector] Not in listening state or transitioning, stopping recognition');
-        
-        // Don't clear callEndedTimeoutRef here, as we need it to persist
-        // through state transitions to prevent premature restart
-        if (noSpeechTimeoutRef.current) {
-          clearTimeout(noSpeechTimeoutRef.current);
-          noSpeechTimeoutRef.current = null;
-        }
-        
-        if (restartTimeoutRef.current) {
-          clearTimeout(restartTimeoutRef.current);
-          restartTimeoutRef.current = null;
-        }
-      }
-      
-      // Cleanup function when state changes or component unmounts
-      return () => {
-        console.log('[WakeWordDetector] Cleanup on state change from', detectorState);
-        
-        // Always stop recognition when state changes to prevent leaks
-        stopRecognition();
-        
-        if (restartTimeoutRef.current) {
-          clearTimeout(restartTimeoutRef.current);
-          restartTimeoutRef.current = null;
-        }
-        
-        if (noSpeechTimeoutRef.current) {
-          clearTimeout(noSpeechTimeoutRef.current);
-          noSpeechTimeoutRef.current = null;
-        }
-      };
-    }, [detectorState, clearAllTimeouts, stopRecognition, startWakeWordDetection]);
-    
-    /**
-     * Initiates a call using the VoiceBot component
-     * Called when wake word is detected
-     */
-    const startCall = useCallback(async () => {
-      console.log('[WakeWordDetector] Starting call...');
-      
-      // Don't start if we're ending a call or already in a call
-      if (isCallEndingRef.current) {
-        console.log('[WakeWordDetector] Cannot start call while ending another call');
-        return;
-      }
-      
-      if (detectorState === 'calling' as DetectorState) {
-        console.log('[WakeWordDetector] Already in a call, ignoring start request');
-        return;
-      }
-
-      // First, forcibly stop any active recognition
-      stopRecognition();
-      
-      // Set transition flags to prevent competing state changes
-      isTransitioningRef.current = true;
-      
-      // Ensure we have microphone permission before starting a call
-      if (!hasMicrophonePermissionRef.current) {
-        console.log('[WakeWordDetector] No microphone permission for call, requesting it');
-        
-        try {
-          await navigator.mediaDevices.getUserMedia({ audio: true });
-          console.log('[WakeWordDetector] Microphone permission granted for call');
-          hasMicrophonePermissionRef.current = true;
-        } catch (err) {
-          console.error('[WakeWordDetector] Microphone permission denied for call:', err);
-          
-          // Show error toast
-          toast({
-            title: "Microphone Access Denied",
-            description: "Microphone access is required for voice calls.",
-            variant: "destructive"
-          });
-          
-          // Go back to listening state
-          isTransitioningRef.current = false;
-          setDetectorState('listening');
-          return;
-        }
-      }
-      
-      // Update state to calling
-      setDetectorState('calling');
-      
-      if (voiceBotRef.current) {
-        try {
-          console.log('[WakeWordDetector] Starting call with VoiceBot');
-          await voiceBotRef.current.startCall();
-          console.log('[WakeWordDetector] Call started successfully');
-          
-          // Keep transitioning flag on for a moment to prevent immediate state changes
-          setTimeout(() => {
-            if (detectorState === 'calling' as DetectorState) {
-              isTransitioningRef.current = false;
-            }
-          }, 2000);
-          
-        } catch (err) {
-          console.error('[WakeWordDetector] Error starting call:', err);
-          
-          // Show error toast
-          toast({
-            title: "Call Error",
-            description: "Failed to start call. Please try again.",
-            variant: "destructive"
-          });
-          
-          // Clear all timeouts before state change
-          clearAllTimeouts();
-          
-          // Go back to listening mode after a delay
-          setTimeout(() => {
-            console.log('[WakeWordDetector] Resetting to listening state after call error');
-            setDetectorState('listening');
-            
-            // Reset flags after another delay
-            setTimeout(() => {
-              isTransitioningRef.current = false;
-              isCallEndingRef.current = false;
-            }, 2000);
-          }, 2000);
-        }
-      } else {
-        console.error('[WakeWordDetector] VoiceBot reference not available');
-        
-        // Show error toast
-        toast({
-          title: "System Error",
-          description: "Voice system not available. Please reload the page.",
-          variant: "destructive"
-        });
-        
-        // Reset state
-        clearAllTimeouts();
-        setTimeout(() => {
-          setDetectorState('listening');
-          setTimeout(() => {
-            isTransitioningRef.current = false;
-          }, 1000);
-        }, 2000);
-      }
-    }, [toast, stopRecognition, clearAllTimeouts, detectorState]);
-
-    // Keep startCallRef current to avoid stale closures
-    useEffect(() => {
-      startCallRef.current = startCall;
-    }, [startCall]);
-    
-    /**
      * Handles the end of a call
      * - Resets state
      * - Notifies parent components
@@ -684,9 +540,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       // Clear any existing timeouts
       clearAllTimeouts();
 
-      // Make sure recognition is stopped
-      stopRecognition();
-
       // Notify parent about call end
       onCallStatusChange?.('ended');
       onEndCall?.();
@@ -694,21 +547,14 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       // Wait a moment before resuming detection
       callEndedTimeoutRef.current = setTimeout(() => {
         console.log('[WakeWordDetector] Resuming wake word detection after call');
-        
-        // Only change state if we're not already transitioning to another state
-        if (detectorState === 'calling') {
-          setDetectorState('listening');
-        }
+        setDetectorState('listening');
         
         // Force restart the recognition after a delay
         setTimeout(() => {
-          // Only reset transition flag if we're still in the same flow
-          if (detectorState === 'listening') {
-            isTransitioningRef.current = false;
-          }
+          isTransitioningRef.current = false;
           
-          // Only restart if we're in listening state and not already listening
-          if (detectorState === 'listening' && !isListeningRef.current && !isTransitioningRef.current) {
+          // Ensure we're not already listening
+          if (!isListeningRef.current) {
             console.log('[WakeWordDetector] Auto-restarting wake word detection');
             stopRecognition(); // Ensure it's stopped
             
@@ -735,13 +581,15 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       }
 
       isCallEndingRef.current = true;
-      isTransitioningRef.current = true;
       console.log('[WakeWordDetector] Starting call end process');
 
       try {
         // Stop recognition first
         stopRecognition();
         clearAllTimeouts();
+
+        // Update state to reflect we're ending the call
+        setDetectorState('listening');
 
         // End the call in VoiceBot
         if (voiceBotRef.current) {
@@ -755,35 +603,19 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
 
         // Wait a moment to ensure everything is cleaned up
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Only change state if we're still in calling
-        if (detectorState === 'calling') {
-          setDetectorState('listening');
-        }
 
-        // Keep transition flag on to prevent immediate restart
-        // Add a longer delay before resetting flags and restarting detection
+        // Reset all states
+        isCallEndingRef.current = false;
+        isTransitioningRef.current = false;
+        isListeningRef.current = false;
+
+        // Start wake word detection again after a delay
         setTimeout(() => {
-          // Reset all states only if we're in listening state
-          if (detectorState === 'listening') {
-            isCallEndingRef.current = false;
-            isTransitioningRef.current = false;
-            isListeningRef.current = false;
-            
-            // Start wake word detection only if we're in listening state
-            setTimeout(() => {
-              if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
-                console.log('[WakeWordDetector] Restarting wake word detection after call end');
-                startWakeWordDetection();
-              }
-            }, 1000);
-          } else {
-            // Just reset the flags without starting detection
-            isCallEndingRef.current = false;
-            isTransitioningRef.current = false;
-            isListeningRef.current = false;
+          if (!isTransitioningRef.current && !isListeningRef.current) {
+            console.log('[WakeWordDetector] Restarting wake word detection after call end');
+            startWakeWordDetection();
           }
-        }, 3000);
+        }, 2000);
 
       } catch (err) {
         console.error('[WakeWordDetector] Error during call end:', err);
@@ -791,21 +623,29 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         isCallEndingRef.current = false;
         isTransitioningRef.current = false;
         isListeningRef.current = false;
-        
-        // Only update state if we were in calling state
-        if (detectorState === 'calling') {
-          setDetectorState('listening');
-        }
-        
+        setDetectorState('listening');
         onCallStatusChange?.('ended');
         onEndCall?.();
       }
-    }, [onCallStatusChange, onEndCall, stopRecognition, clearAllTimeouts, startWakeWordDetection, detectorState]);
+    }, [onCallStatusChange, onEndCall, stopRecognition, clearAllTimeouts, startWakeWordDetection]);
 
     // Expose endCall method via ref for parent components to use
     useImperativeHandle(ref, () => ({
       endCall
     }), [endCall]);
+
+    /**
+     * Helper function to render status text based on detector state
+     */
+    const getStatusText = (state: DetectorState): string => {
+      switch (state) {
+        case 'initializing': return 'Initializing...';
+        case 'listening': return 'Listening for "Hey Anna"';
+        case 'detected': return 'Wake word detected!';
+        case 'calling': return 'In call';
+        case 'error': return 'Error';
+      }
+    };
     
     /**
      * Render method updated to match new UI style
@@ -818,27 +658,17 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
             ref={voiceBotRef}
             onCallStatusChange={(status) => {
               console.log('[WakeWordDetector] Call status changed:', status);
-              
-              // First stop any active recognition to prevent conflicts
-              stopRecognition();
-              
               if (status === 'ended' || status === 'error') {
                 handleCallEnd();
               } else if (status === 'ongoing' || status === 'connecting') {
-                // If a call is active or starting, ensure we're in calling state
+                // If a call is started manually, update our state
                 if (detectorState !== 'calling') {
-                  console.log('[WakeWordDetector] Call detected, updating state to calling');
-                  // Clear all timeouts to prevent any pending operations
-                  clearAllTimeouts();
-                  // Set state to calling
-                  setDetectorState('calling');
-                  // Prevent wake word detection from starting
-                  isTransitioningRef.current = true;
-                  // Ensure recognition is stopped
+                  console.log('[WakeWordDetector] Manual call detected, updating state');
                   stopRecognition();
+                  clearAllTimeouts();
+                  setDetectorState('calling');
                 }
               }
-              
               // Notify parent component about status change
               onCallStatusChange?.(status);
             }}
@@ -862,8 +692,8 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
                 </p>
                 <Button 
                   onClick={() => {
-                    // Request permission again
-                    requestMicrophonePermission();
+                    setDetectorState('listening');
+                    startWakeWordDetection();
                   }}
                 >
                   Try Again
