@@ -1,242 +1,173 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { InfoIcon, Heart, Users, GraduationCap, AwardIcon, Check } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
+import { HelpCircleIcon, MessageSquare, BookOpen, ArrowRight } from 'lucide-react'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 
-export default function AboutTripleP() {
+export default function FAQPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="space-y-8">
         {/* Hero Section */}
         <div className="flex flex-col items-center justify-center text-center space-y-4 py-12">
-          <h1 className="text-4xl md:text-5xl font-bold">Triple P - Positive Parenting Program</h1>
+          <h1 className="text-4xl md:text-5xl font-bold">Frequently Asked Questions</h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
-            Proven, positive tips that can help every family. Make every parenting moment count.
+            Find answers to common questions about Triple P and positive parenting
           </p>
-          <Button size="lg" className="mt-4" onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/triple-p/', '_blank')}>
-            Start Free Course
-          </Button>
         </div>
 
-        {/* What is Triple P */}
+        {/* Main FAQ Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
-              <InfoIcon className="h-6 w-6" />
-              What is Triple P?
+              <HelpCircleIcon className="h-6 w-6" />
+              Parenting Questions
+            </CardTitle>
+            <CardDescription>
+              Common questions about Triple P and how to implement positive parenting strategies
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>What is Triple P?</AccordionTrigger>
+                <AccordionContent>
+                  Triple P (Positive Parenting Program) is a parenting and family support system designed 
+                  to prevent and treat behavioral and emotional problems in children and teenagers. 
+                  It aims to prevent problems in the family, school and community before they arise and 
+                  to create family environments that encourage children to realize their potential.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-2">
+                <AccordionTrigger>How does Triple P work?</AccordionTrigger>
+                <AccordionContent>
+                  Triple P gives parents simple and practical strategies to help them build strong, 
+                  healthy relationships, confidently manage their children behavior and prevent problems 
+                  from developing. The program is built on a foundation of five core positive parenting principles that 
+                  focus on creating a safe, interesting environment, positive learning environment, assertive 
+                  discipline, realistic expectations, and parental self-care.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-3">
+                <AccordionTrigger>What age groups does Triple P work with?</AccordionTrigger>
+                <AccordionContent>
+                  Triple P has programs for parents of children from birth to 16 years. There are specialized 
+                  programs for parents of babies, toddlers, primary schoolers, and teenagers. Each program is 
+                  tailored to the developmental needs of children in those age ranges.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-4">
+                <AccordionTrigger>Is Triple P evidence-based?</AccordionTrigger>
+                <AccordionContent>
+                  Yes, Triple P is one of the most extensively researched parenting programs in the world. 
+                  The program is backed by over 35 years of ongoing research with proven results in many different 
+                  cultures, countries, and family situations. Hundreds of trials and studies have shown that 
+                  Triple P can help families and reduce behavioral and emotional problems in children.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-5">
+                <AccordionTrigger>How long does it take to see results?</AccordionTrigger>
+                <AccordionContent>
+                  Many parents report seeing positive changes in their child behavior within a few weeks 
+                  of implementing Triple P strategies consistently. However, the timeframe can vary depending 
+                  on the specific challenges, the consistency of implementation, and individual family factors. 
+                  The key is consistent application of the strategies over time.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+        
+        {/* Using the AI Assistant */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <MessageSquare className="h-6 w-6" />
+              About the AI Assistant
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="assistant-1">
+                <AccordionTrigger>How does the AI Assistant work?</AccordionTrigger>
+                <AccordionContent>
+                  Our AI Assistant uses voice recognition to listen to your parenting questions and 
+                  provides evidence-based answers based on Triple P principles. Simply activate the 
+                  assistant by speaking to it, and it will provide helpful advice tailored to your situation.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="assistant-2">
+                <AccordionTrigger>Is my conversation with the AI Assistant private?</AccordionTrigger>
+                <AccordionContent>
+                  Yes, your privacy is important to us. Conversations with the AI Assistant are not stored 
+                  permanently, and your personal information is not shared with third parties. The system 
+                  uses anonymized data only to improve the quality of responses.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="assistant-3">
+                <AccordionTrigger>Can the AI Assistant replace professional help?</AccordionTrigger>
+                <AccordionContent>
+                  The AI Assistant provides general guidance based on Triple P principles, but it is not 
+                  a replacement for professional support. For serious concerns about your child behavior 
+                  or mental health, please consult with a qualified healthcare provider or therapist.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+        
+        {/* Resources */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <BookOpen className="h-6 w-6" />
+              Additional Resources
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-lg">
-              Triple P (Positive Parenting Program) is a parenting and family support system designed 
-              to prevent and treat behavioral and emotional problems in children and teenagers. 
-              It aims to prevent problems in the family, school and community before they arise and 
-              to create family environments that encourage children to realize their potential.
+              Looking for more information about Triple P or parenting support? Check out these resources:
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-xl font-semibold flex items-center">
-                  <Heart className="mr-2 h-5 w-5 text-primary" />
-                  Positive Family Support
-                </h3>
-                <p>
-                  Boost your child emotional wellbeing and maintain a good relationship – 
-                  now, and in the years to come.
-                </p>
-              </div>
-              
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-xl font-semibold flex items-center">
-                  <Users className="mr-2 h-5 w-5 text-primary" />
-                  Less Stress, More Joy
-                </h3>
-                <p>
-                  Make family life less stressful and more enjoyable – even in tough times.
-                </p>
-              </div>
-              
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-xl font-semibold flex items-center">
-                  <Check className="mr-2 h-5 w-5 text-primary" />
-                  Practical Strategies
-                </h3>
-                <p>
-                  Set good habits early and prevent problems from getting worse with practical 
-                  strategies you can start using straight away.
-                </p>
-              </div>
-              
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-xl font-semibold flex items-center">
-                  <GraduationCap className="mr-2 h-5 w-5 text-primary" />
-                  Research Backed
-                </h3>
-                <p>
-                  Backed by 35+ years of research studies in Australia and around the world.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Our Courses */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <AwardIcon className="h-6 w-6" />
-              Free Courses
-            </CardTitle>
-            <CardDescription>
-              Every family different, so we make it easy to choose the parenting support that fits your situation.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Triple P Online for Baby</CardTitle>
-                  <CardDescription>Create a positive foundation, right from the start</CardDescription>
-                  <Badge>0 to 1 year</Badge>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <ul className="space-y-1">
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Nurture your baby development</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Understand their cues and strengthen your bond</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Look after your emotional wellbeing</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full mt-4" variant="outline" onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/triple-p/', '_blank')}>Sign Up</Button>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Triple P Online</CardTitle>
-                  <CardDescription>Confidently handle everyday parenting challenges</CardDescription>
-                  <Badge>under 12 years</Badge>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <ul className="space-y-1">
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Improve behaviour and grow closer</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Positively influence your child development</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Create a happier, calmer family life</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full mt-4" variant="outline" onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/triple-p/', '_blank')}>Sign Up</Button>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Fear-Less Triple P Online</CardTitle>
-                  <CardDescription>Build resilience in children and help them manage anxiety</CardDescription>
-                  <Badge>6+ years</Badge>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <ul className="space-y-1">
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Get a better understanding of anxiety</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Learn what to do when your child is anxious</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="mr-2 h-4 w-4 text-primary mt-1" />
-                      <span>Boost resilience and coping skills</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full mt-4" variant="outline" onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/triple-p/', '_blank')}>Sign Up</Button>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Testimonials */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">What Families Say About Triple P</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardContent className="pt-6">
-                  <p className="italic">
-                    This time is going so fast. So now I am really glad that I did it [Triple P] when I did it… 
-                    It is making me see things differently, which is really good.
+                  <h3 className="font-semibold text-lg mb-2">Online Courses</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Access free Triple P online courses for different age groups and specific challenges.
                   </p>
-                  <div className="mt-4 font-semibold">- Ang</div>
+                  <Button 
+                    className="w-full"
+                    onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/triple-p/', '_blank')}
+                  >
+                    <ArrowRight className="mr-2 h-5 w-5" />
+                    Explore Courses
+                  </Button>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardContent className="pt-6">
-                  <p className="italic">
-                    I want to be the kind of dad that uses a positive approach with my kids, 
-                    and Triple P is all about that. It is just a really great program.
+                  <h3 className="font-semibold text-lg mb-2">Local Support</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Find Triple P providers in your local area for face-to-face support.
                   </p>
-                  <div className="mt-4 font-semibold">- Timothy</div>
+                  <Button 
+                    className="w-full"
+                    onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/find-help/find-a-provider/', '_blank')}
+                  >
+                    <ArrowRight className="mr-2 h-5 w-5" />
+                    Find Local Support
+                  </Button>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <p className="italic">
-                    It would have been easy to parent on auto-pilot – doing what my parents had done. 
-                    Instead I now pay attention, to see and understand what is going on in his mind.
-                  </p>
-                  <div className="mt-4 font-semibold">- Yoshie</div>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Backed by Research. Proven by Parents.</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg mb-6">
-              We help parents and families right around the world, in more than 30 countries. 
-              In fact, millions worldwide, including more than a million Australian families, 
-              have been helped by Triple P. So we can help you, too!
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div className="p-6 rounded-lg bg-primary/10">
-                <div className="text-4xl font-bold text-primary">35+</div>
-                <div className="mt-2">Years of Research</div>
-              </div>
-              <div className="p-6 rounded-lg bg-primary/10">
-                <div className="text-4xl font-bold text-primary">30+</div>
-                <div className="mt-2">Countries</div>
-              </div>
-              <div className="p-6 rounded-lg bg-primary/10">
-                <div className="text-4xl font-bold text-primary">1M+</div>
-                <div className="mt-2">Australian Families</div>
-              </div>
             </div>
           </CardContent>
         </Card>

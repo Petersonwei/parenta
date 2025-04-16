@@ -19,7 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Menu, MessageSquare, Briefcase } from 'lucide-react'
+import { Menu, HelpCircle } from 'lucide-react'
 
 export function TopNav() {
   const pathname = usePathname()
@@ -57,21 +57,8 @@ export function TopNav() {
                       pathname === "/about" && "bg-accent text-accent-foreground shadow-sm"
                     )}
                   >
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    About Triple P
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/chat" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
-                      pathname === "/chat" && "bg-accent text-accent-foreground shadow-sm"
-                    )}
-                  >
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Chat with Me
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    FAQ
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -110,20 +97,8 @@ export function TopNav() {
                           pathname === "/about" && "bg-secondary shadow-sm"
                         )}
                       >
-                        <Briefcase className="mr-2 h-4 w-4" />
-                        About Triple P
-                      </Button>
-                    </Link>
-                    <Link href="/chat" legacyBehavior passHref>
-                      <Button
-                        variant={pathname === "/chat" ? "secondary" : "ghost"}
-                        className={cn(
-                          "w-full justify-start transition-all",
-                          pathname === "/chat" && "bg-secondary shadow-sm"
-                        )}
-                      >
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Chat with Me
+                        <HelpCircle className="mr-2 h-4 w-4" />
+                        FAQ
                       </Button>
                     </Link>
                   </nav>

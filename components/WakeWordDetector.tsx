@@ -44,6 +44,7 @@ interface SpeechRecognition extends EventTarget {
 // Define possible states for the wake word detector
 type DetectorState = 'initializing' | 'listening' | 'detected' | 'calling' | 'error';
 
+// Message interface for communication with parent components
 interface Message {
   id: string
   type: 'response' | 'transcription'
@@ -53,16 +54,28 @@ interface Message {
   isComplete?: boolean
 }
 
+// Props for the WakeWordDetector component
 interface WakeWordDetectorProps {
-  onCallStatusChange?: (status: string) => void;
-  onMessagesUpdate?: (messages: Message[]) => void;
-  onEndCall?: () => void;
+  onCallStatusChange?: (status: string) => void;  // Callback when call status changes
+  onMessagesUpdate?: (messages: Message[]) => void;  // Callback to update messages in parent
+  onEndCall?: () => void;  // Callback when call ends
 }
 
+// Methods exposed via ref to parent components
 export interface WakeWordDetectorRef {
-  endCall: () => Promise<void>;
+  endCall: () => Promise<void>;  // Method to programmatically end a call
 }
 
+/**
+ * WakeWordDetector - A component that listens for a wake word ("Hey Anna" or "Hi Anna")
+ * and initiates a voice call when detected.
+ * 
+ * This component handles:
+ * - Microphone permission requests
+ * - Speech recognition to detect wake words
+ * - State management for the detection and calling process
+ * - Integration with VoiceBot for handling the actual call
+ */
 const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
   ({ onCallStatusChange, onMessagesUpdate, onEndCall }, ref) => {
     const { toast } = useToast()
@@ -71,17 +84,19 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const [detectorState, setDetectorState] = useState<DetectorState>('initializing');
     
     // Refs for speech recognition and VoiceBot
-    const recognitionRef = useRef<SpeechRecognition | null>(null);
-    const voiceBotRef = useRef<{ startCall: () => Promise<void>; endCall: () => Promise<void> } | null>(null);
-    const noSpeechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const callEndedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const isTransitioningRef = useRef<boolean>(false);
-    const isListeningRef = useRef<boolean>(false);
-    const isCallEndingRef = useRef<boolean>(false);
-    const startCallRef = useRef<() => Promise<void>>(() => Promise.resolve());
+    const recognitionRef = useRef<SpeechRecognition | null>(null);  // Holds the speech recognition instance
+    const voiceBotRef = useRef<{ startCall: () => Promise<void>; endCall: () => Promise<void> } | null>(null);  // Reference to VoiceBot component
+    const noSpeechTimeoutRef = useRef<NodeJS.Timeout | null>(null);  // Timeout for when no speech is detected
+    const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);  // Timeout for restarting recognition
+    const callEndedTimeoutRef = useRef<NodeJS.Timeout | null>(null);  // Timeout after call ends
+    const isTransitioningRef = useRef<boolean>(false);  // Flag to prevent multiple state transitions
+    const isListeningRef = useRef<boolean>(false);  // Flag to track if recognition is active
+    const isCallEndingRef = useRef<boolean>(false);  // Flag to prevent multiple call end attempts
+    const startCallRef = useRef<() => Promise<void>>(() => Promise.resolve());  // Reference to startCall function
     
-    // Clear all timeouts to prevent memory leaks
+    /**
+     * Clears all timeouts to prevent memory leaks and unexpected behavior
+     */
     const clearAllTimeouts = useCallback(() => {
       if (noSpeechTimeoutRef.current) {
         clearTimeout(noSpeechTimeoutRef.current);
@@ -99,7 +114,9 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       }
     }, []);
     
-    // Function to stop recognition safely
+    /**
+     * Safely stops the speech recognition process
+     */
     const stopRecognition = useCallback(() => {
       if (recognitionRef.current) {
         try {
@@ -113,7 +130,12 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       isListeningRef.current = false;
     }, []);
     
-    // Check for browser support and request permissions once on mount
+    /**
+     * Initialize the detector on mount:
+     * - Check browser support for speech recognition
+     * - Request microphone permissions
+     * - Set up initial state
+     */
     useEffect(() => {
       if (typeof window === 'undefined') return;
       
@@ -153,7 +175,11 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       };
     }, [toast, stopRecognition, clearAllTimeouts]);
     
-    // Start/stop recognition based on detector state
+    /**
+     * Manages speech recognition based on detector state
+     * - Starts recognition when in 'listening' state
+     * - Stops recognition in other states
+     */
     useEffect(() => {
       if (typeof window === 'undefined') return;
       
@@ -206,7 +232,10 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       };
     }, [detectorState, clearAllTimeouts, stopRecognition]);
     
-    // Function to start a call
+    /**
+     * Initiates a call using the VoiceBot component
+     * Called when wake word is detected
+     */
     const startCall = useCallback(async () => {
       // Don't start if we're ending a call
       if (isCallEndingRef.current) {
@@ -239,12 +268,17 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       }
     }, [toast]);
 
-    // Keep startCallRef current
+    // Keep startCallRef current to avoid stale closures
     useEffect(() => {
       startCallRef.current = startCall;
     }, [startCall]);
     
-    // Function to start wake word detection
+    /**
+     * Starts the wake word detection process
+     * - Creates a new SpeechRecognition instance
+     * - Sets up event handlers for speech recognition
+     * - Handles wake word detection logic
+     */
     const startWakeWordDetection = useCallback(() => {
       if (typeof window === 'undefined') return;
       
@@ -299,6 +333,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         }, 10000); // 10 seconds timeout
       };
       
+      // Handle recognition errors
       recognition.onerror = (event: SpeechRecognitionEvent) => {
         // Handle different types of errors
         if (event.error === 'no-speech') {
@@ -344,6 +379,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         }
       };
       
+      // Handle recognition end event
       recognition.onend = () => {
         console.log('[WakeWordDetector] Wake word detection ended');
         isListeningRef.current = false;
@@ -367,6 +403,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         }
       };
       
+      // Process speech recognition results
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         // Clear the no-speech timeout since we got a result
         if (noSpeechTimeoutRef.current) {
@@ -388,7 +425,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         
         // More lenient wake word detection - check for partial matches
         const detectWakeWord = (text: string) => {
-          // Check for exact matches first
           // Check for exact matches first
           if (text.includes('hey anna') || text.includes('hi anna')) {
             return true;
@@ -464,7 +500,12 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       }
     }, [detectorState, stopRecognition, clearAllTimeouts, toast]);
     
-    // Function to handle call end
+    /**
+     * Handles the end of a call
+     * - Resets state
+     * - Notifies parent components
+     * - Resumes wake word detection
+     */
     const handleCallEnd = () => {
       console.log('[WakeWordDetector] Call ended, resuming wake word detection');
       
@@ -503,7 +544,11 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       }, 2000);
     };
 
-    // Function to end call
+    /**
+     * Programmatically ends an active call
+     * - Can be called by parent components via ref
+     * - Resets state and resumes wake word detection
+     */
     const endCall = useCallback(async () => {
       if (isCallEndingRef.current) {
         console.log('[WakeWordDetector] Call is already ending, ignoring request');
@@ -559,12 +604,14 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       }
     }, [onCallStatusChange, onEndCall, stopRecognition, clearAllTimeouts, startWakeWordDetection]);
 
-    // Expose endCall via ref
+    // Expose endCall method via ref for parent components to use
     useImperativeHandle(ref, () => ({
       endCall
     }), [endCall]);
 
-    // Helper function to render status text based on detector state
+    /**
+     * Helper function to render status text based on detector state
+     */
     const getStatusText = (state: DetectorState): string => {
       switch (state) {
         case 'initializing': return 'Initializing...';
@@ -590,6 +637,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
               <span className="text-xs sm:text-sm text-red-500">Microphone access denied</span>
             ) : (
               <>
+                {/* Status indicator dot */}
                 <div 
                   className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full mr-2 ${
                     detectorState === 'listening' && isListeningRef.current
@@ -603,6 +651,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
                             : 'bg-red-500'
                   }`} 
                 />
+                {/* Status text */}
                 <span className="text-xs sm:text-sm font-medium text-gray-700">
                   {detectorState === 'listening' && isListeningRef.current
                     ? 'Active' 
