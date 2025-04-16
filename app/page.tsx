@@ -5,15 +5,33 @@ import { Card, CardContent } from "@/components/ui/card"
 import { MessageSquare } from 'lucide-react'
 import WakeWordDetector from '@/components/WakeWordDetector'
 import TranscriptOverlay from '@/components/TranscriptOverlay'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Message } from '@/components/chat/types'
+import { useToast } from "@/hooks/use-toast"
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isCallActive, setIsCallActive] = useState(false)
+  const [isStartingCall, setIsStartingCall] = useState(false)
   const wakeWordDetectorRef = useRef<{ endCall: () => Promise<void> } | null>(null)
+  const { toast } = useToast()
 
   const handleCallStatusChange = (status: string) => {
+    if (status === 'ongoing') {
+      // Call is now active and connected
+      setIsStartingCall(false)
+      toast({
+        title: "Call Connected",
+        description: "You're now talking with Anna. Speak naturally!",
+      })
+    } else if (status === 'connecting') {
+      // Still connecting
+      setIsStartingCall(true)
+    } else if (status === 'ended' || status === 'error') {
+      // Call has ended or had an error
+      setIsStartingCall(false)
+    }
+    
     setIsCallActive(status === 'ongoing' || status === 'connecting')
   }
 
@@ -25,17 +43,58 @@ export default function Home() {
     if (wakeWordDetectorRef.current) {
       await wakeWordDetectorRef.current.endCall()
       setIsCallActive(false)
+      setIsStartingCall(false)
+      toast({
+        title: "Call Ended",
+        description: "Your conversation with Anna has ended.",
+      })
     }
   }
 
   const startConversation = () => {
-    // Manually trigger a call by simulating the wake word detection
+    // Prevent multiple rapid starts
+    if (isStartingCall || isCallActive) {
+      toast({
+        title: "Already active",
+        description: "A conversation is already in progress.",
+      })
+      return
+    }
+    
+    // Show feedback to the user
+    toast({
+      title: "Starting conversation",
+      description: "Anna is joining the call...",
+    })
+    
+    // Update the state to show connecting status
+    setIsStartingCall(true)
     handleCallStatusChange('connecting')
     
     // Dispatch a custom event that can be listened for by WakeWordDetector
     const event = new CustomEvent('startConversation')
     window.dispatchEvent(event)
+    
+    // Set a timeout to check if the call actually starts
+    setTimeout(() => {
+      if (isStartingCall && !isCallActive) {
+        toast({
+          title: "Connection taking longer than expected",
+          description: "Please be patient or try again.",
+        })
+      }
+    }, 5000)
   }
+
+  // Keep track of component mounting to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      // Cleanup on component unmount
+      if (isCallActive && wakeWordDetectorRef.current) {
+        wakeWordDetectorRef.current.endCall().catch(console.error)
+      }
+    }
+  }, [isCallActive])
 
   return (
     <div className="h-full flex flex-col">
@@ -61,8 +120,9 @@ export default function Home() {
                   size="lg" 
                   className="bg-black text-white hover:bg-gray-800"
                   onClick={startConversation}
+                  disabled={isStartingCall || isCallActive}
                 >
-                  Start Conversation
+                  {isStartingCall ? "Connecting..." : isCallActive ? "Conversation Active" : "Start Conversation"}
                 </Button>
               </div>
             </CardContent>
