@@ -493,34 +493,46 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         setDetectorState('error');
       }
         
-      // Add event listener for manual start
-      const handleStartConversation = () => {
-        console.log('[WakeWordDetector] Received startConversation event');
-        if (detectorState === 'listening') {
-          stopRecognition();
-          clearAllTimeouts();
-          isTransitioningRef.current = true;
-          setDetectorState('detected');
-          
-          // Start call after a short delay
-          setTimeout(() => {
-            startCallRef.current();
-            setTimeout(() => {
-              isTransitioningRef.current = false;
-            }, 1000);
-          }, 500);
-        }
-      };
-      
-      window.addEventListener('startConversation', handleStartConversation);
-        
       // Cleanup on unmount
       return () => {
         stopRecognition();
         clearAllTimeouts();
-        window.removeEventListener('startConversation', handleStartConversation);
       };
     }, [toast, stopRecognition, clearAllTimeouts, detectorState]);
+    
+    /**
+     * Set up event listener for manual start via the Start Conversation button
+     */
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      
+      // Add event listener for manual start
+      const handleStartConversation = () => {
+        console.log('[WakeWordDetector] Received startConversation event');
+        // Always handle the event regardless of current state
+        stopRecognition();
+        clearAllTimeouts();
+        isTransitioningRef.current = true;
+        setDetectorState('detected');
+        
+        // Start call after a short delay
+        setTimeout(() => {
+          startCallRef.current();
+          setTimeout(() => {
+            isTransitioningRef.current = false;
+          }, 1000);
+        }, 500);
+      };
+      
+      console.log('[WakeWordDetector] Adding startConversation event listener');
+      window.addEventListener('startConversation', handleStartConversation);
+      
+      // Cleanup on unmount
+      return () => {
+        console.log('[WakeWordDetector] Removing startConversation event listener');
+        window.removeEventListener('startConversation', handleStartConversation);
+      };
+    }, [stopRecognition, clearAllTimeouts]);
     
     /**
      * Manages speech recognition based on detector state

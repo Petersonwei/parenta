@@ -61,7 +61,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
   if (!isCallActive) return null;
 
   // Get the latest message
-  const latestMessage = messages[messages.length - 1];
+  const latestMessage = messages.length > 0 ? messages[messages.length - 1] : null;
   const isPeterSpeaking = latestMessage?.role === 'assistant' && !latestMessage?.isComplete;
 
   return (
@@ -105,27 +105,37 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
             className="flex-grow rounded-xl bg-muted/50 backdrop-blur-sm p-2 sm:p-4 min-h-[10vh] landscape:min-h-[10vh] landscape:h-auto landscape:p-2 overflow-y-auto landscape-scrollarea"
           >
             <div className="space-y-2 sm:space-y-4 landscape:space-y-1.5">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  <Card className={`max-w-[85%] sm:max-w-[80%] shadow-sm ${
-                    message.role === 'user' 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-background border-muted'
-                  }`}>
-                    <CardContent className="p-2 sm:p-3 landscape:p-1.5">
-                      <p className="text-xs font-medium mb-1 opacity-70 landscape:text-[10px] landscape:mb-0.5 landscape-text">
-                        {message.role === 'user' ? 'You' : 'Anna'}
-                      </p>
-                      <p className="text-xs sm:text-base leading-relaxed landscape:leading-snug landscape:text-xs landscape-text">{message.content}</p>
+              {messages.length > 0 ? (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <Card className={`max-w-[85%] sm:max-w-[80%] shadow-sm ${
+                      message.role === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-background border-muted'
+                    }`}>
+                      <CardContent className="p-2 sm:p-3 landscape:p-1.5">
+                        <p className="text-xs font-medium mb-1 opacity-70 landscape:text-[10px] landscape:mb-0.5 landscape-text">
+                          {message.role === 'user' ? 'You' : 'Anna'}
+                        </p>
+                        <p className="text-xs sm:text-base leading-relaxed landscape:leading-snug landscape:text-xs landscape-text">{message.content}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-center items-center h-full py-4">
+                  <Card className="bg-background border-muted max-w-[90%]">
+                    <CardContent className="p-3">
+                      <p className="text-center text-muted-foreground">Connecting to Anna...</p>
                     </CardContent>
                   </Card>
                 </div>
-              ))}
+              )}
             </div>
           </ScrollArea>
         </CardContent>
