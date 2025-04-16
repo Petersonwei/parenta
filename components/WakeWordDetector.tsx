@@ -432,6 +432,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
      * - Starts recognition when in 'listening' state
      * - Stops recognition in other states
      */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
       if (typeof window === 'undefined') return;
       
@@ -482,7 +483,6 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           noSpeechTimeoutRef.current = null;
         }
       };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [detectorState, clearAllTimeouts, stopRecognition]);
     
     /**
