@@ -42,7 +42,7 @@ export default function Home() {
       {/* Hero Banner */}
       <div className="bg-blue-500 text-white text-center py-12 px-4">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to Parenta</h1>
-        <p className="text-xl">Your personal voice assistant powered by AI</p>
+        <p className="text-xl">Your personal parenting counselor powered by AI</p>
       </div>
 
       <div className="max-w-5xl mx-auto w-full p-4 md:p-6 flex-1">
