@@ -96,7 +96,7 @@ export default function Home() {
                   <h3 className="font-semibold text-lg">Say the wake word</h3>
                 </div>
                 <p className="text-gray-600">
-                  Activate the assistant by saying Hey Anna clearly.
+                  Activate the assistant by saying Hi Anna clearly.
                 </p>
               </CardContent>
             </Card>
