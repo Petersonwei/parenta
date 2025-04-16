@@ -96,6 +96,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const isListeningRef = useRef<boolean>(false);  // Flag to track if recognition is active
     const isCallEndingRef = useRef<boolean>(false);  // Flag to prevent multiple call end attempts
     const startCallRef = useRef<() => Promise<void>>(() => Promise.resolve());  // Reference to startCall function
+    const hasMicrophonePermissionRef = useRef<boolean>(false);  // Track if microphone permission has been granted
     
     /**
      * Clears all timeouts to prevent memory leaks and unexpected behavior
@@ -134,6 +135,43 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     }, []);
     
     /**
+     * Request microphone permission and handle the result
+     */
+    const requestMicrophonePermission = useCallback(() => {
+      console.log('[WakeWordDetector] Requesting microphone permission');
+      
+      // Prevent multiple requests
+      if (isTransitioningRef.current) {
+        console.log('[WakeWordDetector] Already requesting permission, ignoring duplicate request');
+        return;
+      }
+      
+      isTransitioningRef.current = true;
+      
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => {
+          console.log('[WakeWordDetector] Microphone permission granted');
+          hasMicrophonePermissionRef.current = true;
+          setDetectorState('listening');
+          isTransitioningRef.current = false;
+        })
+        .catch((err) => {
+          console.error('[WakeWordDetector] Microphone permission denied:', err);
+          
+          // Show toast
+          toast({
+            title: "Microphone Access Denied",
+            description: "Please allow microphone access to use the wake word feature.",
+            variant: "destructive"
+          });
+          
+          // Set error state
+          setDetectorState('error');
+          isTransitioningRef.current = false;
+        });
+    }, [toast]);
+    
+    /**
      * Starts the wake word detection process
      * - Creates a new SpeechRecognition instance
      * - Sets up event handlers for speech recognition
@@ -151,6 +189,15 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       // Don't start if we're not in listening state or if we're in a call
       if (detectorState !== 'listening') {
         console.log('[WakeWordDetector] Not in proper state for wake word detection:', detectorState);
+        return;
+      }
+      
+      // Make sure we have microphone permission before starting
+      if (!hasMicrophonePermissionRef.current) {
+        console.log('[WakeWordDetector] No microphone permission, requesting it first');
+        setDetectorState('initializing');
+        // Request permission again
+        requestMicrophonePermission();
         return;
       }
       
@@ -216,12 +263,21 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           isListeningRef.current = false;
         } else if (event.error === 'not-allowed') {
           console.error('[WakeWordDetector] Microphone access denied:', event.error);
-          setDetectorState('error');
-          toast({
-            title: "Microphone Access Error",
-            description: "Please allow microphone access in your browser settings.",
-            variant: "destructive"
-          });
+          
+          // Mark permission as not granted
+          hasMicrophonePermissionRef.current = false;
+          
+          // If we're in a call, don't show error state to avoid interrupting the call
+          if (detectorState !== 'calling' as DetectorState) {
+            setDetectorState('error');
+            toast({
+              title: "Microphone Access Error",
+              description: "Please allow microphone access in your browser settings.",
+              variant: "destructive"
+            });
+          } else {
+            console.log('[WakeWordDetector] Ignoring microphone error during active call');
+          }
         } else {
           // For other errors, log and restart if needed
           console.error('[WakeWordDetector] Recognition error:', event.error);
@@ -390,27 +446,14 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
         return;
       }
       
-      // Request microphone permission
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(() => {
-          console.log('[WakeWordDetector] Microphone permission granted');
-          // Start in listening mode once permission is granted
-          setDetectorState('listening');
-        })
-        .catch((err) => {
-          console.error('[WakeWordDetector] Microphone permission denied:', err);
-          toast({
-            title: "Microphone Access Denied",
-            description: "Please allow microphone access to use the wake word feature.",
-            variant: "destructive"
-          });
-          setDetectorState('error');
-        });
+      // Request microphone permission using our shared function
+      requestMicrophonePermission();
         
       // Add event listener for manual start
       const handleStartConversation = () => {
         console.log('[WakeWordDetector] Received startConversation event');
-        if (detectorState === 'listening') {
+        // Only respond to the event if we have microphone permission
+        if (detectorState === 'listening' && hasMicrophonePermissionRef.current) {
           stopRecognition();
           clearAllTimeouts();
           isTransitioningRef.current = true;
@@ -533,6 +576,31 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
       
       // Set transition flags to prevent competing state changes
       isTransitioningRef.current = true;
+      
+      // Ensure we have microphone permission before starting a call
+      if (!hasMicrophonePermissionRef.current) {
+        console.log('[WakeWordDetector] No microphone permission for call, requesting it');
+        
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+          console.log('[WakeWordDetector] Microphone permission granted for call');
+          hasMicrophonePermissionRef.current = true;
+        } catch (err) {
+          console.error('[WakeWordDetector] Microphone permission denied for call:', err);
+          
+          // Show error toast
+          toast({
+            title: "Microphone Access Denied",
+            description: "Microphone access is required for voice calls.",
+            variant: "destructive"
+          });
+          
+          // Go back to listening state
+          isTransitioningRef.current = false;
+          setDetectorState('listening');
+          return;
+        }
+      }
       
       // Update state to calling
       setDetectorState('calling');
@@ -794,8 +862,8 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
                 </p>
                 <Button 
                   onClick={() => {
-                    setDetectorState('listening');
-                    startWakeWordDetection();
+                    // Request permission again
+                    requestMicrophonePermission();
                   }}
                 >
                   Try Again
