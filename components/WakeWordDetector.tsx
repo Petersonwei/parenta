@@ -3,6 +3,9 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
 import { useToast } from "@/hooks/use-toast"
 import VoiceBot from './VoiceBot'
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { MessageSquare } from 'lucide-react'
 
 // Define SpeechRecognition types
 interface SpeechRecognitionEvent extends Event {
@@ -168,12 +171,34 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           setDetectorState('error');
         });
         
+      // Add event listener for manual start
+      const handleStartConversation = () => {
+        console.log('[WakeWordDetector] Received startConversation event');
+        if (detectorState === 'listening') {
+          stopRecognition();
+          clearAllTimeouts();
+          isTransitioningRef.current = true;
+          setDetectorState('detected');
+          
+          // Start call after a short delay
+          setTimeout(() => {
+            startCallRef.current();
+            setTimeout(() => {
+              isTransitioningRef.current = false;
+            }, 1000);
+          }, 500);
+        }
+      };
+      
+      window.addEventListener('startConversation', handleStartConversation);
+        
       // Cleanup on unmount
       return () => {
         stopRecognition();
         clearAllTimeouts();
+        window.removeEventListener('startConversation', handleStartConversation);
       };
-    }, [toast, stopRecognition, clearAllTimeouts]);
+    }, [toast, stopRecognition, clearAllTimeouts, detectorState]);
     
     /**
      * Manages speech recognition based on detector state
@@ -615,94 +640,68 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
     const getStatusText = (state: DetectorState): string => {
       switch (state) {
         case 'initializing': return 'Initializing...';
-        case 'listening': return 'Listening for Hi Anna';
+        case 'listening': return 'Listening for "Hey Anna"';
         case 'detected': return 'Wake word detected!';
         case 'calling': return 'In call';
         case 'error': return 'Error';
       }
     };
     
-    // Render different UI based on detector state
+    /**
+     * Render method updated to match new UI style
+     */
     return (
       <div className="wake-word-detector">
-        <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-white border border-gray-200 rounded-md shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold text-blue-700">Wake Word Status</h2>
-            <p className="text-xs sm:text-sm text-gray-600">
-              {getStatusText(detectorState)}
-            </p>
-          </div>
-          <div className="flex items-center justify-end">
-            {detectorState === 'error' ? (
-              <span className="text-xs sm:text-sm text-red-500">Microphone access denied</span>
-            ) : (
-              <>
-                {/* Status indicator dot */}
-                <div 
-                  className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full mr-2 ${
-                    detectorState === 'listening' && isListeningRef.current
-                      ? 'bg-green-500' 
-                      : detectorState === 'listening' && !isListeningRef.current
-                        ? 'bg-yellow-500'
-                        : detectorState === 'calling'
-                          ? 'bg-blue-500'
-                          : detectorState === 'detected'
-                            ? 'bg-yellow-500'
-                            : 'bg-red-500'
-                  }`} 
-                />
-                {/* Status text */}
-                <span className="text-xs sm:text-sm font-medium text-gray-700">
-                  {detectorState === 'listening' && isListeningRef.current
-                    ? 'Active' 
-                    : detectorState === 'listening' && !isListeningRef.current
-                      ? 'Reconnecting...'
-                      : detectorState === 'calling'
-                        ? 'In Call'
-                        : detectorState === 'detected'
-                          ? 'Detected!'
-                          : 'Initializing...'}
-                </span>
-              </>
-            )}
-            {/* Restart button shown when there's an error */}
-            {detectorState === 'error' && (
-              <button
-                className="ml-3 sm:ml-4 px-2 sm:px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                onClick={() => {
-                  setDetectorState('listening');
-                  startWakeWordDetection();
-                }}
-              >
-                Restart
-              </button>
-            )}
-          </div>
-        </div>
-        
-        <VoiceBot 
-          ref={voiceBotRef}
-          onCallStatusChange={(status) => {
-            console.log('[WakeWordDetector] Call status changed:', status);
-            if (status === 'ended' || status === 'error') {
-              handleCallEnd();
-            } else if (status === 'ongoing' || status === 'connecting') {
-              // If a call is started manually, update our state
-              if (detectorState !== 'calling') {
-                console.log('[WakeWordDetector] Manual call detected, updating state');
-                stopRecognition();
-                clearAllTimeouts();
-                setDetectorState('calling');
+        {/* The VoiceBot component is kept for functionality but hidden from view */}
+        <div className="hidden">
+          <VoiceBot 
+            ref={voiceBotRef}
+            onCallStatusChange={(status) => {
+              console.log('[WakeWordDetector] Call status changed:', status);
+              if (status === 'ended' || status === 'error') {
+                handleCallEnd();
+              } else if (status === 'ongoing' || status === 'connecting') {
+                // If a call is started manually, update our state
+                if (detectorState !== 'calling') {
+                  console.log('[WakeWordDetector] Manual call detected, updating state');
+                  stopRecognition();
+                  clearAllTimeouts();
+                  setDetectorState('calling');
+                }
               }
-            }
-            // Notify parent component about status change
-            onCallStatusChange?.(status);
-          }}
-          onMessagesUpdate={(messages) => {
-            // Pass messages to parent component
-            onMessagesUpdate?.(messages);
-          }}
-        />
+              // Notify parent component about status change
+              onCallStatusChange?.(status);
+            }}
+            onMessagesUpdate={(messages) => {
+              // Pass messages to parent component
+              onMessagesUpdate?.(messages);
+            }}
+          />
+        </div>
+
+        {detectorState === 'error' && (
+          <Card className="mb-4 border-red-300">
+            <CardContent className="p-4">
+              <div className="flex flex-col items-center text-center">
+                <div className="bg-red-100 p-3 rounded-full mb-4">
+                  <MessageSquare className="h-6 w-6 text-red-500" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Microphone Access Denied</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Please allow microphone access to use the voice assistant features.
+                </p>
+                <Button 
+                  onClick={() => {
+                    setDetectorState('listening');
+                    startWakeWordDetection();
+                  }}
+                >
+                  Try Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }

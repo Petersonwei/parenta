@@ -1,9 +1,8 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { HelpCircleIcon, MessageSquare, BookOpen, ArrowRight } from 'lucide-react'
+import { HelpCircleIcon, MessageSquare } from 'lucide-react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
 
 export default function FAQPage() {
   return (
@@ -123,54 +122,6 @@ export default function FAQPage() {
           </CardContent>
         </Card>
         
-        {/* Resources */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <BookOpen className="h-6 w-6" />
-              Additional Resources
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-lg">
-              Looking for more information about Triple P or parenting support? Check out these resources:
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold text-lg mb-2">Online Courses</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Access free Triple P online courses for different age groups and specific challenges.
-                  </p>
-                  <Button 
-                    className="w-full"
-                    onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/triple-p/', '_blank')}
-                  >
-                    <ArrowRight className="mr-2 h-5 w-5" />
-                    Explore Courses
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold text-lg mb-2">Local Support</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Find Triple P providers in your local area for face-to-face support.
-                  </p>
-                  <Button 
-                    className="w-full"
-                    onClick={() => window.open('https://www.triplep-parenting.net.au/qld-en/find-help/find-a-provider/', '_blank')}
-                  >
-                    <ArrowRight className="mr-2 h-5 w-5" />
-                    Find Local Support
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
