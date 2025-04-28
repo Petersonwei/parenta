@@ -6,7 +6,7 @@ export default function InstructionsCard() {
     <Card className="mb-4 sm:mb-6 shadow-md">
       <CardHeader className="pb-2 px-4 pt-4">
         <CardTitle className="text-xl font-bold">
-          Quick Guide - Triple P Voice Assistant
+          Quick Guide - Parenta Voice Assistant
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">

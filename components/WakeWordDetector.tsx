@@ -226,7 +226,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
           isListeningRef.current = true;
           
           // Set a shorter timeout for mobile devices
-          const timeoutDuration = isMobile ? 5000 : 10000;
+          const timeoutDuration = isMobile ? 8000 : 15000; // Increased from 5000/10000 to make listening time longer
           
           // Set a timeout to handle the "no-speech" error
           // This will restart recognition if no speech is detected for a while
@@ -240,7 +240,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
                 if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
                   startWakeWordDetection();
                 }
-              }, 500);
+              }, 200); // Decreased from 500ms to make refetching gap shorter
             }
           }, timeoutDuration);
         };
@@ -260,7 +260,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
                 if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
                   startWakeWordDetection();
                 }
-              }, 500);
+              }, 200); // Decreased from 500ms to make refetching gap shorter
             }
           } else if (event.error === 'aborted') {
             // Ignore aborted errors - these happen when we stop recognition intentionally
@@ -286,7 +286,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
                 if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
                   startWakeWordDetection();
                 }
-              }, 1000);
+              }, 300); // Decreased from 1000ms to make refetching gap shorter
             }
           }
         };
@@ -311,7 +311,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
               if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
                 startWakeWordDetection();
               }
-            }, 500);
+            }, 200); // Decreased from 500ms to make refetching gap shorter
           }
         };
         
@@ -407,7 +407,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
               if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
                 startWakeWordDetection();
               }
-            }, isMobile ? 2000 : 1000); // Longer delay on mobile
+            }, isMobile ? 1000 : 300); // Decreased from 2000/1000 to make refetching gap shorter
           }
         }
       } catch (err) {
@@ -421,7 +421,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
             if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
               startWakeWordDetection();
             }
-          }, isMobile ? 3000 : 1000);
+          }, isMobile ? 1500 : 300); // Decreased from 3000/1000 to make refetching gap shorter
         }
       }
     }, [detectorState, stopRecognition, clearAllTimeouts, toast]);
@@ -700,10 +700,10 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
               if (detectorState === 'listening' && !isTransitioningRef.current && !isListeningRef.current) {
                 startWakeWordDetection();
               }
-            }, 500);
+            }, 200); // Decreased from 500ms to make refetching gap shorter
           }
-        }, 1000);
-      }, 2000);
+        }, 500); // Reduced from 1000ms for faster response after call
+      }, 1000); // Reduced from 2000ms for faster recovery after call ends
     };
 
     /**
@@ -752,7 +752,7 @@ const WakeWordDetector = forwardRef<WakeWordDetectorRef, WakeWordDetectorProps>(
             console.log('[WakeWordDetector] Restarting wake word detection after call end');
             startWakeWordDetection();
           }
-        }, 2000);
+        }, 500); // Adjusted from previously changed 200ms to 500ms to allow for state cleanup
 
       } catch (err) {
         console.error('[WakeWordDetector] Error during call end:', err);

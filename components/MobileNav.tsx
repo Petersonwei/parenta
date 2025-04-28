@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { Home, MessageSquare, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
@@ -28,14 +27,6 @@ export default function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
       <Card className="m-4 p-4 border-none shadow-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Image 
-              src="/Triple P Logo.png" 
-              alt="Triple P Logo" 
-              width={40} 
-              height={40} 
-              className="mr-2"
-              priority
-            />
             <h1 className="text-lg font-bold text-primary">Voice AI</h1>
           </div>
           

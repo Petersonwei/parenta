@@ -1,6 +1,6 @@
 'use client'
 
-import Image from 'next/image'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -29,17 +29,6 @@ export function TopNav() {
       <div className="flex h-16 items-center px-4 container mx-auto">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm"></div>
-            <Image 
-              src="/Triple P Logo.png" 
-              alt="Triple P Logo" 
-              width={40} 
-              height={40} 
-              className="rounded-full relative"
-              priority
-            />
-          </div>
           <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Parenta
           </span>

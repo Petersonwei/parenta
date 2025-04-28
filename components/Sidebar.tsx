@@ -1,6 +1,6 @@
 'use client'
 
-import Image from 'next/image'
+
 import { Home, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -17,14 +17,6 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Logo */}
       <Card className="m-4 p-4 border-none shadow-none">
         <div className="flex flex-col items-center">
-          <Image 
-            src="/Triple P Logo.png" 
-            alt="Triple P Logo" 
-            width={150} 
-            height={150} 
-            className="mb-3"
-            priority
-          />
           <h1 className="text-xl font-bold text-primary">Voice AI</h1>
         </div>
       </Card>
