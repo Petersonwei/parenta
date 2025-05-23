@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
-import { PhoneOff, Mic, MessageSquare } from "lucide-react"
+import { PhoneOff, MessageSquare } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useEffect, useState, useRef } from "react"
 import Image from "next/image"
