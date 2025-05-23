@@ -114,10 +114,10 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-stretch z-50 overflow-hidden">
       <div className="w-full h-full flex flex-col">
         {/* Header with end call button */}
-        <div className="bg-background/95 backdrop-blur-sm p-3 border-b flex items-center justify-between">
+        <div className="bg-background/95 backdrop-blur-sm p-2 sm:p-3 border-b flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center">
-              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <MessageSquare className="w-4 h-4 text-primary-foreground" />
             </div>
             <h2 className="text-sm sm:text-lg font-semibold">
               {isPeterSpeaking ? "Anna is speaking..." : "Anna"}
@@ -127,18 +127,18 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
             onClick={onEndCall}
             variant="destructive"
             size="sm"
-            className="rounded-full px-3 sm:px-4 py-1"
+            className="rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs"
             disabled={!canEndCall}
           >
-            <PhoneOff className="mr-1 h-4 w-4" />
-            <span className="text-xs sm:text-sm">End Call</span>
+            <PhoneOff className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="sm:inline hidden">End Call</span>
           </Button>
         </div>
         
-        <div className="flex flex-grow overflow-hidden">
+        <div className="flex flex-grow overflow-hidden h-[calc(100%-48px)]">
           {/* Left side - Anna's avatar */}
-          <div className="w-1/3 max-w-[280px] border-r bg-muted/20 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-            <div className="relative w-28 h-28 sm:w-40 sm:h-40 mb-4">
+          <div className="w-1/4 sm:w-1/3 max-w-[200px] border-r bg-muted/10 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4">
+            <div className="relative w-16 h-16 xs:w-20 xs:h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mb-2 sm:mb-4">
               <div className="rounded-full overflow-hidden w-full h-full relative">
                 <Image
                   src="/Anna.png"
@@ -156,25 +156,12 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
               </div>
             </div>
             
-            <div className="text-center">
-              <p className="text-sm font-medium mb-2">SPEAKING</p>
-              <div className="flex justify-center mb-4">
-                {isPeterSpeaking && <VoiceWave />}
-              </div>
-              <div className="flex flex-wrap justify-center gap-2">
-                <div className="rounded-full bg-muted px-3 py-1 flex items-center">
-                  <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
-                  <span className="text-xs">CONCENTRATION</span>
+            <div className="text-center w-full">
+              {isPeterSpeaking && (
+                <div className="py-2 px-1 mb-1 sm:mb-2 bg-black/20 backdrop-blur-sm rounded-full">
+                  <VoiceWave />
                 </div>
-                <div className="rounded-full bg-muted px-3 py-1 flex items-center">
-                  <div className="h-2 w-2 rounded-full bg-orange-400 mr-2"></div>
-                  <span className="text-xs">DETERMINATION</span>
-                </div>
-                <div className="rounded-full bg-muted px-3 py-1 flex items-center">
-                  <div className="h-2 w-2 rounded-full bg-blue-400 mr-2"></div>
-                  <span className="text-xs">INTEREST</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
           
@@ -182,9 +169,9 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
           <div className="flex-grow flex flex-col overflow-hidden">
             <ScrollArea 
               ref={scrollAreaRef}
-              className="flex-grow p-4 overflow-y-auto"
+              className="flex-grow p-2 sm:p-4 overflow-y-auto"
             >
-              <div className="space-y-3 max-w-3xl mx-auto">
+              <div className="space-y-2 sm:space-y-3 max-w-3xl mx-auto">
                 {messages.length > 0 ? (
                   messages.map((message) => (
                     <div
@@ -198,11 +185,11 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                           ? 'bg-primary text-primary-foreground' 
                           : 'bg-background border-muted'
                       }`}>
-                        <CardContent className="p-3">
+                        <CardContent className="p-2 sm:p-3">
                           <p className="text-xs font-medium mb-1 opacity-70">
                             {message.role === 'user' ? 'You' : 'Anna'}
                           </p>
-                          <p className="text-sm leading-relaxed">{message.content}</p>
+                          <p className="text-xs sm:text-sm leading-relaxed">{message.content}</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -221,6 +208,22 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
           </div>
         </div>
       </div>
+
+      {/* Styles for landscape orientation on mobile */}
+      <style jsx global>{`
+        @media (max-height: 500px) and (orientation: landscape) {
+          .w-1\/4 {
+            width: 80px !important;
+            min-width: 80px !important;
+          }
+          h2 {
+            font-size: 0.875rem !important;
+          }
+          p {
+            font-size: 0.75rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 
