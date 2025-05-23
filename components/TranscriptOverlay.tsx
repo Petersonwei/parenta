@@ -160,16 +160,17 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:block">
-              <p className="text-sm text-muted-foreground">
-                Say <span className="font-medium text-primary">"bye bye anna"</span> to end chat
+            {/* Voice command tip - Visible on all screens */}
+            <div className="flex items-center bg-primary/10 rounded-full px-3 py-1.5">
+              <p className="text-xs sm:text-sm font-medium text-foreground/90">
+                Say <span className="font-semibold text-primary">bye bye anna</span> to end
               </p>
             </div>
             <Button
               onClick={onEndCall}
               variant="destructive"
               size="sm"
-              className="h-7 sm:h-8 rounded-full px-2 sm:px-3 text-xs"
+              className="h-7 sm:h-8 rounded-full px-2 sm:px-3 text-xs font-medium"
               disabled={!canEndCall}
             >
               <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -227,10 +228,12 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                           : 'bg-background border-muted'
                       }`}>
                         <CardContent className="p-2 sm:p-3">
-                          <p className="text-[10px] sm:text-xs font-medium mb-0.5 sm:mb-1 opacity-70">
+                          <p className="text-[10px] sm:text-xs font-semibold mb-0.5 sm:mb-1 opacity-90">
                             {message.role === 'user' ? 'You' : 'Anna'}
                           </p>
-                          <p className="text-xs sm:text-sm leading-relaxed">{message.content}</p>
+                          <p className="text-xs sm:text-sm leading-relaxed font-medium">
+                            {message.content}
+                          </p>
                         </CardContent>
                       </Card>
                     </div>
@@ -239,7 +242,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                   <div className="flex justify-center items-center h-full py-4">
                     <Card className="bg-background border-muted max-w-[90%]">
                       <CardContent className="p-2 sm:p-3">
-                        <p className="text-center text-xs sm:text-sm text-muted-foreground">
+                        <p className="text-center text-xs sm:text-sm font-medium text-foreground/90">
                           Connecting to Anna...
                         </p>
                       </CardContent>
@@ -248,10 +251,6 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                 )}
               </div>
             </ScrollArea>
-            {/* Info text about voice command */}
-            <div className="bg-background/95 backdrop-blur-sm p-2 text-center border-t">
-              <p className="text-xs text-muted-foreground">Tip: Say "bye bye anna" to end the chat</p>
-            </div>
           </div>
         </div>
       </div>

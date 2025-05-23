@@ -69,12 +69,12 @@ export default function Home() {
                   <MessageSquare className="h-10 w-10 text-blue-500" />
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Voice Assistant</h2>
-                <p className="text-gray-600 mb-8 max-w-md">
+                <p className="text-foreground/90 mb-8 max-w-md">
                   Talk to your AI assistant using voice commands. Just say Hi Anna to get started.
                 </p>
                 <Button 
                   size="lg" 
-                  className="bg-black text-white hover:bg-gray-800"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={startConversation}
                 >
                   Start Conversation
@@ -91,12 +91,12 @@ export default function Home() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <div className="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
-                    <span className="font-semibold">1</span>
+                  <div className="bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                    <span className="font-bold text-foreground">1</span>
                   </div>
                   <h3 className="font-semibold text-lg">Allow microphone access</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-foreground/80">
                   When prompted, allow the browser to access your microphone.
                 </p>
               </CardContent>
@@ -105,12 +105,12 @@ export default function Home() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <div className="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
-                    <span className="font-semibold">2</span>
+                  <div className="bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                    <span className="font-bold text-foreground">2</span>
                   </div>
                   <h3 className="font-semibold text-lg">Say the wake word</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-foreground/80">
                   Activate the assistant by saying Hi Anna clearly.
                 </p>
               </CardContent>
@@ -119,12 +119,12 @@ export default function Home() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <div className="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
-                    <span className="font-semibold">3</span>
+                  <div className="bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                    <span className="font-bold text-foreground">3</span>
                   </div>
                   <h3 className="font-semibold text-lg">Have a conversation</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-foreground/80">
                   Once connected, speak naturally with your AI assistant.
                 </p>
               </CardContent>
