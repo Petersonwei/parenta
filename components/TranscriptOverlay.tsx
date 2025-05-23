@@ -88,7 +88,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
     }
   }, [isCallActive, toast])
 
-  // Add keyframe animation for voice wave
+  // Add keyframe animations
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -97,10 +97,23 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
         50% { transform: scaleY(1); }
         100% { transform: scaleY(0.4); }
       }
+      @keyframes circleWave {
+        0% { transform: scale(1); opacity: 0.4; }
+        100% { transform: scale(1.3); opacity: 0; }
+      }
+      @keyframes glowPulse {
+        0% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.2); }
+        50% { box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.4); }
+        100% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.2); }
+      }
     `;
     document.head.appendChild(style);
+    
+    // Return a cleanup function that removes the style element
     return () => {
-      document.head.removeChild(style);
+      if (style && document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
     };
   }, []);
 
@@ -114,12 +127,12 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-stretch z-50 overflow-hidden">
       <div className="w-full h-full flex flex-col">
         {/* Header with end call button */}
-        <div className="bg-background/95 backdrop-blur-sm p-2 sm:p-3 border-b flex items-center justify-between">
+        <div className="bg-background/95 backdrop-blur-sm px-2 py-1.5 sm:p-3 border-b flex items-center justify-between min-h-[40px] sm:min-h-[48px]">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <MessageSquare className="w-4 h-4 text-primary-foreground" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center">
+              <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
             </div>
-            <h2 className="text-sm sm:text-lg font-semibold">
+            <h2 className="text-sm sm:text-base font-semibold truncate">
               {isPeterSpeaking ? "Anna is speaking..." : "Anna"}
             </h2>
           </div>
@@ -127,19 +140,32 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
             onClick={onEndCall}
             variant="destructive"
             size="sm"
-            className="rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs"
+            className="h-7 sm:h-8 rounded-full px-2 sm:px-3 text-xs"
             disabled={!canEndCall}
           >
-            <PhoneOff className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="sm:inline hidden">End Call</span>
+            <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="ml-1 hidden sm:inline">End Call</span>
           </Button>
         </div>
         
-        <div className="flex flex-grow overflow-hidden h-[calc(100%-48px)]">
+        <div className="flex flex-grow overflow-hidden h-[calc(100%-40px)] sm:h-[calc(100%-48px)]">
           {/* Left side - Anna's avatar */}
-          <div className="w-1/4 sm:w-1/3 max-w-[200px] border-r bg-muted/10 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4">
-            <div className="relative w-16 h-16 xs:w-20 xs:h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mb-2 sm:mb-4">
-              <div className="rounded-full overflow-hidden w-full h-full relative">
+          <div className="w-20 sm:w-[120px] md:w-[200px] border-r bg-muted/10 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4">
+            <div className="relative">
+              {/* Circular waves */}
+              {isPeterSpeaking && (
+                <>
+                  <div className="absolute inset-0 rounded-full border-2 border-primary/40"
+                       style={{ animation: 'circleWave 2s infinite' }}></div>
+                  <div className="absolute inset-0 rounded-full border-2 border-primary/40"
+                       style={{ animation: 'circleWave 2s infinite 0.5s' }}></div>
+                  <div className="absolute inset-0 rounded-full border-2 border-primary/40"
+                       style={{ animation: 'circleWave 2s infinite 1s' }}></div>
+                </>
+              )}
+              {/* Avatar */}
+              <div className={`relative w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-full overflow-hidden 
+                             ${isPeterSpeaking ? 'animate-[glowPulse_2s_ease-in-out_infinite]' : ''}`}>
                 <Image
                   src="/Anna.png"
                   alt="Anna"
@@ -147,22 +173,15 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                   style={{ objectFit: "cover" }}
                   className="rounded-full"
                 />
-                {isPeterSpeaking && (
-                  <>
-                    <div className="absolute inset-0 rounded-full border-2 border-primary/20"></div>
-                    <div className="absolute inset-0 rounded-full border-2 border-primary animate-ping opacity-40"></div>
-                  </>
-                )}
               </div>
             </div>
             
-            <div className="text-center w-full">
-              {isPeterSpeaking && (
-                <div className="py-2 px-1 mb-1 sm:mb-2 bg-black/20 backdrop-blur-sm rounded-full">
-                  <VoiceWave />
-                </div>
-              )}
-            </div>
+            {/* Voice wave below avatar */}
+            {isPeterSpeaking && (
+              <div className="w-full mt-2 py-1.5 px-1 bg-black/20 backdrop-blur-sm rounded-full">
+                <VoiceWave />
+              </div>
+            )}
           </div>
           
           {/* Right side - Messages */}
@@ -186,7 +205,7 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                           : 'bg-background border-muted'
                       }`}>
                         <CardContent className="p-2 sm:p-3">
-                          <p className="text-xs font-medium mb-1 opacity-70">
+                          <p className="text-[10px] sm:text-xs font-medium mb-0.5 sm:mb-1 opacity-70">
                             {message.role === 'user' ? 'You' : 'Anna'}
                           </p>
                           <p className="text-xs sm:text-sm leading-relaxed">{message.content}</p>
@@ -197,8 +216,10 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                 ) : (
                   <div className="flex justify-center items-center h-full py-4">
                     <Card className="bg-background border-muted max-w-[90%]">
-                      <CardContent className="p-3">
-                        <p className="text-center text-muted-foreground">Connecting to Anna...</p>
+                      <CardContent className="p-2 sm:p-3">
+                        <p className="text-center text-xs sm:text-sm text-muted-foreground">
+                          Connecting to Anna...
+                        </p>
                       </CardContent>
                     </Card>
                   </div>
