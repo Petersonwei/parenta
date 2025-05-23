@@ -159,16 +159,23 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
               {isPeterSpeaking ? "Anna is speaking..." : "Anna"}
             </h2>
           </div>
-          <Button
-            onClick={onEndCall}
-            variant="destructive"
-            size="sm"
-            className="h-7 sm:h-8 rounded-full px-2 sm:px-3 text-xs"
-            disabled={!canEndCall}
-          >
-            <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="ml-1 hidden sm:inline">End Call</span>
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block">
+              <p className="text-sm text-muted-foreground">
+                Say <span className="font-medium text-primary">"bye bye anna"</span> to end chat
+              </p>
+            </div>
+            <Button
+              onClick={onEndCall}
+              variant="destructive"
+              size="sm"
+              className="h-7 sm:h-8 rounded-full px-2 sm:px-3 text-xs"
+              disabled={!canEndCall}
+            >
+              <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="ml-1 hidden sm:inline">End Call</span>
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-grow overflow-hidden h-[calc(100%-40px)] sm:h-[calc(100%-48px)]">
@@ -241,6 +248,10 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
                 )}
               </div>
             </ScrollArea>
+            {/* Info text about voice command */}
+            <div className="bg-background/95 backdrop-blur-sm p-2 text-center border-t">
+              <p className="text-xs text-muted-foreground">Tip: Say "bye bye anna" to end the chat</p>
+            </div>
           </div>
         </div>
       </div>
