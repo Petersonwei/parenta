@@ -52,28 +52,6 @@ function VoiceWave() {
   );
 }
 
-// Status indicator with concentration/mood tags
-function StatusIndicator({ isPeterSpeaking }: { isPeterSpeaking: boolean }) {
-  return (
-    <div className="mt-2 flex flex-col gap-1">
-      <div className="flex items-center gap-1">
-        <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
-        <span className="text-xs text-muted-foreground">
-          {isPeterSpeaking ? "SPEAKING" : "LISTENING"}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-1">
-        {["CONCENTRATION", "INTEREST", "DETERMINATION"].map((tag) => (
-          <div key={tag} className="rounded-full bg-muted px-2 py-0.5 flex items-center">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary mr-1"></div>
-            <span className="text-[10px]">{tag}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function TranscriptOverlay({ messages, onEndCall, isCallActive }: TranscriptOverlayProps) {
   const { toast } = useToast()
   const [canEndCall, setCanEndCall] = useState(false)
