@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { PhoneOff, Mic, MessageSquare } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useEffect, useState, useRef } from "react"
+import Image from "next/image"
 
 interface Message {
   id: string
@@ -18,6 +19,59 @@ interface TranscriptOverlayProps {
   messages: Message[]
   onEndCall: () => void
   isCallActive: boolean
+}
+
+// Enhanced voice wave animation component
+function VoiceWave() {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center p-1.5 bg-black/20 backdrop-blur-sm">
+      <div className="flex items-center justify-center gap-1.5">
+        {[1, 2, 3, 4, 5, 6, 7].map((i) => {
+          // Calculate a height based on position (taller in middle)
+          const baseHeight = i === 1 || i === 7 ? 6 : i === 2 || i === 6 ? 10 : i === 3 || i === 5 ? 14 : 16;
+          return (
+            <div 
+              key={i}
+              className="bg-white rounded-full"
+              style={{ 
+                height: `${baseHeight}px`,
+                width: '3px',
+                animationName: 'voiceWave',
+                animationDuration: `${0.8 + (i * 0.1)}s`,
+                animationIterationCount: 'infinite',
+                animationDirection: 'alternate',
+                animationTimingFunction: 'ease-in-out',
+                animationDelay: `${i * 0.05}s`,
+                opacity: '0.9'
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Status indicator with concentration/mood tags
+function StatusIndicator({ isPeterSpeaking }: { isPeterSpeaking: boolean }) {
+  return (
+    <div className="mt-2 flex flex-col gap-1">
+      <div className="flex items-center gap-1">
+        <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+        <span className="text-xs text-muted-foreground">
+          {isPeterSpeaking ? "SPEAKING" : "LISTENING"}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {["CONCENTRATION", "INTEREST", "DETERMINATION"].map((tag) => (
+          <div key={tag} className="rounded-full bg-muted px-2 py-0.5 flex items-center">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary mr-1"></div>
+            <span className="text-[10px]">{tag}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function TranscriptOverlay({ messages, onEndCall, isCallActive }: TranscriptOverlayProps) {
@@ -57,6 +111,22 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
       setCanEndCall(false)
     }
   }, [isCallActive, toast])
+
+  // Add keyframe animation for voice wave
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes voiceWave {
+        0% { transform: scaleY(0.4); }
+        50% { transform: scaleY(1); }
+        100% { transform: scaleY(0.4); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   if (!isCallActive) return null;
 
@@ -98,6 +168,28 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
               <PhoneOff className="mr-1 h-4 w-4 landscape:h-3 landscape:w-3" />
               <span className="text-xs sm:text-base landscape:text-[10px] landscape-text">End Call</span>
             </Button>
+          </div>
+          
+          {/* Voice interaction visualization */}
+          <div className="mb-3 flex justify-center">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36">
+              <div className="rounded-full overflow-hidden w-full h-full relative">
+                <Image
+                  src="/Anna.png"
+                  alt="Anna"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  className="rounded-full"
+                />
+                {isPeterSpeaking && (
+                  <>
+                    <div className="absolute inset-0 rounded-full border-2 border-primary/20"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-primary animate-ping opacity-40"></div>
+                    <VoiceWave />
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           <ScrollArea 
