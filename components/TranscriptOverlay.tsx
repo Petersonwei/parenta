@@ -50,6 +50,26 @@ function VoiceWave() {
   );
 }
 
+// Circular wave animation component
+function CircularWaves({ isActive }: { isActive: boolean }) {
+  return (
+    <>
+      <div 
+        className={`absolute inset-0 rounded-full border-2 border-primary/40 ${isActive ? 'animate-[circleWave_2s_infinite]' : 'animate-[circleWave_3s_infinite]'}`}
+        style={{ animationDelay: '0s' }}
+      />
+      <div 
+        className={`absolute inset-0 rounded-full border-2 border-primary/40 ${isActive ? 'animate-[circleWave_2s_infinite]' : 'animate-[circleWave_3s_infinite]'}`}
+        style={{ animationDelay: '0.5s' }}
+      />
+      <div 
+        className={`absolute inset-0 rounded-full border-2 border-primary/40 ${isActive ? 'animate-[circleWave_2s_infinite]' : 'animate-[circleWave_3s_infinite]'}`}
+        style={{ animationDelay: '1s' }}
+      />
+    </>
+  );
+}
+
 export default function TranscriptOverlay({ messages, onEndCall, isCallActive }: TranscriptOverlayProps) {
   const { toast } = useToast()
   const [canEndCall, setCanEndCall] = useState(false)
@@ -106,10 +126,14 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
         50% { box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.4); }
         100% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.2); }
       }
+      @keyframes softGlowPulse {
+        0% { box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.1); }
+        50% { box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.2); }
+        100% { box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.1); }
+      }
     `;
     document.head.appendChild(style);
     
-    // Return a cleanup function that removes the style element
     return () => {
       if (style && document.head.contains(style)) {
         document.head.removeChild(style);
@@ -119,14 +143,13 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
 
   if (!isCallActive) return null;
 
-  // Get the latest message
   const latestMessage = messages.length > 0 ? messages[messages.length - 1] : null;
   const isPeterSpeaking = latestMessage?.role === 'assistant' && !latestMessage?.isComplete;
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-stretch z-50 overflow-hidden">
       <div className="w-full h-full flex flex-col">
-        {/* Header with end call button */}
+        {/* Header */}
         <div className="bg-background/95 backdrop-blur-sm px-2 py-1.5 sm:p-3 border-b flex items-center justify-between min-h-[40px] sm:min-h-[48px]">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center">
@@ -152,20 +175,12 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
           {/* Left side - Anna's avatar */}
           <div className="w-20 sm:w-[120px] md:w-[200px] border-r bg-muted/10 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4">
             <div className="relative">
-              {/* Circular waves */}
-              {isPeterSpeaking && (
-                <>
-                  <div className="absolute inset-0 rounded-full border-2 border-primary/40"
-                       style={{ animation: 'circleWave 2s infinite' }}></div>
-                  <div className="absolute inset-0 rounded-full border-2 border-primary/40"
-                       style={{ animation: 'circleWave 2s infinite 0.5s' }}></div>
-                  <div className="absolute inset-0 rounded-full border-2 border-primary/40"
-                       style={{ animation: 'circleWave 2s infinite 1s' }}></div>
-                </>
-              )}
+              {/* Circular waves - always active but different speed when speaking */}
+              <CircularWaves isActive={isPeterSpeaking} />
+              
               {/* Avatar */}
               <div className={`relative w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-full overflow-hidden 
-                             ${isPeterSpeaking ? 'animate-[glowPulse_2s_ease-in-out_infinite]' : ''}`}>
+                             ${isPeterSpeaking ? 'animate-[glowPulse_2s_ease-in-out_infinite]' : 'animate-[softGlowPulse_3s_ease-in-out_infinite]'}`}>
                 <Image
                   src="/Anna.png"
                   alt="Anna"
@@ -176,12 +191,12 @@ export default function TranscriptOverlay({ messages, onEndCall, isCallActive }:
               </div>
             </div>
             
-            {/* Voice wave below avatar */}
-            {isPeterSpeaking && (
-              <div className="w-full mt-2 py-1.5 px-1 bg-black/20 backdrop-blur-sm rounded-full">
-                <VoiceWave />
-              </div>
-            )}
+            {/* Voice wave - always visible but different style when speaking */}
+            <div className={`w-full mt-2 py-1.5 px-1 rounded-full ${
+              isPeterSpeaking ? 'bg-black/20' : 'bg-black/10'
+            } backdrop-blur-sm`}>
+              <VoiceWave />
+            </div>
           </div>
           
           {/* Right side - Messages */}
